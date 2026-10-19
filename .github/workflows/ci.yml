@@ -14,10 +14,66 @@ permissions:
 
 jobs:
   backend:
-    name: Back-end (build, tests, quality)
+    # One job per module: each one shows up on its own in the run, with the list of its tests in its summary
+    name: Back-end / ${{ matrix.module }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      checks: write
+    strategy:
+      fail-fast: false
+      matrix:
+        module: [fleet-common, fleet-messaging, fleet-documents, vehicle-service, quote-service, notification-service, reporting-service, telemetry-service, vehicle-simulator, integration-esb, bigdata-pipeline, energy-service, graphql-gateway, legacy-portal-war]
+    defaults:
+      run:
+        working-directory: back
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "25"
+          cache: maven
+
+      - name: Build the modules it depends on
+        run: sh mvnw -B -ntp -pl ${{ matrix.module }} -am install -DskipTests -Dcheckstyle.skip -Djacoco.skip
+
+      # Unit tests, integration tests (Testcontainers: PostgreSQL, Kafka, ActiveMQ), Cucumber scenarios, Checkstyle, JaCoCo
+      - name: Tests of ${{ matrix.module }}
+        run: sh mvnw -B -ntp -pl ${{ matrix.module }} verify
+
+      - name: Test results
+        if: always()
+        uses: mikepenz/action-junit-report@v5
+        with:
+          report_paths: |
+            back/${{ matrix.module }}/target/surefire-reports/TEST-*.xml
+            back/${{ matrix.module }}/target/failsafe-reports/TEST-*.xml
+          check_name: Tests / ${{ matrix.module }}
+          detailed_summary: true
+          include_passed: true
+          require_tests: false
+
+      - name: Test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tests-${{ matrix.module }}
+          path: |
+            back/${{ matrix.module }}/target/surefire-reports/
+            back/${{ matrix.module }}/target/failsafe-reports/
+            back/${{ matrix.module }}/target/site/jacoco/
+            back/${{ matrix.module }}/target/cucumber/
+          if-no-files-found: ignore
+          retention-days: 14
+
+  quality:
+    name: Quality gate (SonarQube)
+    # Runs only when the repository defines SONAR_HOST_URL (Settings > Secrets and variables > Actions)
+    if: ${{ vars.SONAR_HOST_URL != '' }}
     runs-on: ubuntu-latest
     env:
-      # Optional: the analysis runs only when the repository defines these (Settings > Secrets and variables)
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL }}
     defaults:
@@ -27,32 +83,13 @@ jobs:
       - uses: actions/checkout@v5
         with:
           fetch-depth: 0 # full history for SonarQube "new code" detection
-
       - uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: "25"
           cache: maven
-
-      # Unit tests, integration tests (Testcontainers: PostgreSQL, Kafka), Cucumber scenarios, Checkstyle, JaCoCo
-      - name: Build and test
-        run: sh mvnw -B -ntp verify
-
-      - name: SonarQube analysis
-        if: ${{ env.SONAR_TOKEN != '' && env.SONAR_HOST_URL != '' }}
-        run: sh mvnw -B -ntp sonar:sonar -Dsonar.host.url="$SONAR_HOST_URL" -Dsonar.token="$SONAR_TOKEN" -Dsonar.qualitygate.wait=true
-
-      - name: Test reports
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: backend-test-reports
-          path: |
-            back/**/target/surefire-reports/
-            back/**/target/failsafe-reports/
-            back/**/target/site/jacoco/
-            back/**/target/cucumber/
-          retention-days: 14
+      - name: Build, tests and analysis
+        run: sh mvnw -B -ntp verify sonar:sonar -Dsonar.host.url="$SONAR_HOST_URL" -Dsonar.token="$SONAR_TOKEN" -Dsonar.qualitygate.wait=true
 
   frontend:
     name: Portal (types, unit tests, build)
@@ -82,6 +119,9 @@ jobs:
   android:
     name: Driver app (Android, unit tests, build)
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      checks: write
     defaults:
       run:
         working-directory: mobile/android
@@ -95,6 +135,14 @@ jobs:
       # The SDK of the runner is completed by the Android Gradle Plugin (platform 37, build tools)
       - name: Unit tests and debug build
         run: sh gradlew --no-daemon testDebugUnitTest assembleDebug
+      - name: Test results
+        if: always()
+        uses: mikepenz/action-junit-report@v5
+        with:
+          report_paths: mobile/android/app/build/test-results/**/TEST-*.xml
+          check_name: Tests / Android
+          detailed_summary: true
+          include_passed: true
       - name: Test reports and APK
         if: always()
         uses: actions/upload-artifact@v4
