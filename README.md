@@ -49,16 +49,16 @@ identity provider and an analytics stack, all started with **one `docker compose
 
 ## Why FleetPilot
 
-|                                    |                                                                                                                                                                                                       |
-| ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Nothing falls through the gaps** | Deadlines are scheduled from French rules (technical inspection at 4 years then every 2, every year for trucks, services by date or mileage) and reminded at D-30, D-7 and when overdue, exactly once. |
-| **Garage quotes cost less**        | Every quote is compared line by line with a reference tariff: overpriced parts, hours above the standard time, duplicates, hourly rate. Conforming quotes are accepted on their own, the others negotiated. |
-| **Real data, not declarations**    | Connected vehicles report their odometer, trips and fault codes; fuel card transactions are checked one by one; lessor invoices are matched against the contracts.                                    |
-| **The move to electric, in euros** | Each vehicle is checked against its real usage over 90 days. The platform proposes an electric model, the yearly saving, the CO2 avoided and a quarterly plan that meets the LOM law quotas.           |
-| **Drivers in the loop**            | A native Android app and an installable web app: fill-ups, inspections with photos, claims with GPS position, garages nearby, notifications. Everything works offline and leaves when the network is back. |
+|                                    |                                                                                                                                                                                                                   |
+| ---------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Nothing falls through the gaps** | Deadlines are scheduled from French rules (technical inspection at 4 years then every 2, every year for trucks, services by date or mileage) and reminded at D-30, D-7 and when overdue, exactly once.            |
+| **Garage quotes cost less**        | Every quote is compared line by line with a reference tariff: overpriced parts, hours above the standard time, duplicates, hourly rate. Conforming quotes are accepted on their own, the others negotiated.       |
+| **Real data, not declarations**    | Connected vehicles report their odometer, trips and fault codes; fuel card transactions are checked one by one; lessor invoices are matched against the contracts.                                                |
+| **The move to electric, in euros** | Each vehicle is checked against its real usage over 90 days. The platform proposes an electric model, the yearly saving, the CO2 avoided and a quarterly plan that meets the LOM law quotas.                      |
+| **Drivers in the loop**            | A native Android app and an installable web app: fill-ups, inspections with photos, claims with GPS position, garages nearby, notifications. Everything works offline and leaves when the network is back.        |
 | **Partners plugged in**            | Garages send XML quotes or use their own space, lessors use their extranet, the insurer is called through its API, fuel card providers drop CSV files: one integration bus, every exchange logged and replayable. |
-| **Run from the portal**            | Client companies, sites, user accounts, rules of the quote analysis and electric catalogue are administered in the portal, and an activity journal tells who did what. |
-| **Secure and dependable**         | Strict isolation between client companies, single sign-on, events that are never lost, centralised logs, tests at every level and a CI pipeline with a quality gate.                                  |
+| **Run from the portal**            | Client companies, sites, user accounts, rules of the quote analysis and electric catalogue are administered in the portal, and an activity journal tells who did what.                                            |
+| **Secure and dependable**          | Strict isolation between client companies, single sign-on, events that are never lost, centralised logs, tests at every level and a CI pipeline with a quality gate.                                              |
 
 ## Quick start
 
@@ -75,43 +75,43 @@ The first start builds the images, creates one database per service, imports the
 data and starts the vehicle simulator. Every service has a health check: open the portal when
 `docker compose ps` shows them all `healthy` (a few minutes on the first start).
 
-| URL                                          | What                                                                    |
-| -------------------------------------------- | ----------------------------------------------------------------------- |
-| http://localhost                             | **Portal**: fleet managers, garage space, driver web app                |
-| http://localhost:8095/extranet               | **Lessor extranet v1** (WAR on Tomcat behind Apache httpd)              |
-| http://localhost:8025                        | **Mailpit**: every e-mail sent by FleetPilot, with its PDF attachments  |
-| http://localhost:8180/admin                  | Keycloak administration (`admin` / `admin`)                             |
-| http://localhost:8161                        | ActiveMQ console (`admin` / `admin`)                                    |
-| http://localhost:8081/swagger-ui.html        | Fleet API, interactive documentation (the same page on each service port) |
-| http://localhost:5601                        | Kibana dashboards (with the `observability` profile)                    |
+| URL                                   | What                                                                      |
+| ------------------------------------- | ------------------------------------------------------------------------- |
+| http://localhost                      | **Portal**: fleet managers, garage space, driver web app                  |
+| http://localhost:8095/extranet        | **Lessor extranet v1** (WAR on Tomcat behind Apache httpd)                |
+| http://localhost:8025                 | **Mailpit**: every e-mail sent by FleetPilot, with its PDF attachments    |
+| http://localhost:8180/admin           | Keycloak administration (`admin` / `admin`)                               |
+| http://localhost:8161                 | ActiveMQ console (`admin` / `admin`)                                      |
+| http://localhost:8081/swagger-ui.html | Fleet API, interactive documentation (the same page on each service port) |
+| http://localhost:5601                 | Kibana dashboards (with the `observability` profile)                      |
 
-| Command                                          | Effect                                                                     |
-| ------------------------------------------------ | -------------------------------------------------------------------------- |
-| `docker compose up -d --build`                   | Core platform: databases, messaging, identity, services, portal, extranet |
-| `docker compose --profile observability up -d`   | Adds Elasticsearch, Logstash, Filebeat, Kibana and the Kafka Streams pipeline |
-| `docker compose --profile tools up -d`           | Adds Kafka UI on http://localhost:8091                                     |
-| `docker compose --profile quality up -d`         | Adds SonarQube on http://localhost:9000                                    |
-| `docker compose down`                            | Stops everything, data is kept                                             |
-| `docker compose down -v`                         | Stops everything and deletes the data (the demo is generated again on the next start) |
+| Command                                        | Effect                                                                                |
+| ---------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `docker compose up -d --build`                 | Core platform: databases, messaging, identity, services, portal, extranet             |
+| `docker compose --profile observability up -d` | Adds Elasticsearch, Logstash, Filebeat, Kibana and the Kafka Streams pipeline         |
+| `docker compose --profile tools up -d`         | Adds Kafka UI on http://localhost:8091                                                |
+| `docker compose --profile quality up -d`       | Adds SonarQube on http://localhost:9000                                               |
+| `docker compose down`                          | Stops everything, data is kept                                                        |
+| `docker compose down -v`                       | Stops everything and deletes the data (the demo is generated again on the next start) |
 
 ### Sign in
 
 There is **one sign-in page** for everyone (Keycloak, in the colours of FleetPilot): the account decides what you
 see. Password of every demo account: **`FleetPilot2026!`**
 
-| Account                                | Role                         | What it shows                                                              |
-| -------------------------------------- | ---------------------------- | -------------------------------------------------------------------------- |
-| `claire.morel`                         | Fleet manager (LDAP)         | The fleets of the three client companies: the account used in this README  |
-| `theo.lambert`                         | Platform administrator (LDAP) | Everything, including the administration: companies, accounts, settings  |
-| `m.roux@neolia-energies.fr`            | Client fleet manager         | The fleet of Néolia Énergies only                                          |
-| `p.bianchi@azur-provence-metropole.fr` | Client fleet manager         | The fleet of Métropole Azur Provence only                                  |
-| `n.haddad@calanques-logistique.fr`     | Client fleet manager         | The fleet of Transports Calanques Logistique only                          |
-| `jean.dupont@neolia-energies.fr`       | Driver, Marseille            | The van GR-832-SJ in the driver app (Android, or http://localhost/conducteur) |
-| `camille.martin@neolia-energies.fr`    | Driver, Marseille            | Another driver of the same company                                         |
-| `atelier@garage-du-prado.fr`           | Garage                       | The garage space of Garage du Prado, Marseille                             |
-| `devis@carrosserie-vieux-port.fr`      | Garage                       | The garage space of Carrosserie du Vieux-Port, Marseille                   |
-| `extranet@arval.fr`                    | Lessor                       | The Arval contracts in the extranet v1                                     |
-| `extranet@ayvens.fr`                   | Lessor                       | The Ayvens contracts in the extranet v1                                    |
+| Account                                | Role                          | What it shows                                                                 |
+| -------------------------------------- | ----------------------------- | ----------------------------------------------------------------------------- |
+| `claire.morel`                         | Fleet manager (LDAP)          | The fleets of the three client companies: the account used in this README     |
+| `theo.lambert`                         | Platform administrator (LDAP) | Everything, including the administration: companies, accounts, settings       |
+| `m.roux@neolia-energies.fr`            | Client fleet manager          | The fleet of Néolia Énergies only                                             |
+| `p.bianchi@azur-provence-metropole.fr` | Client fleet manager          | The fleet of Métropole Azur Provence only                                     |
+| `n.haddad@calanques-logistique.fr`     | Client fleet manager          | The fleet of Transports Calanques Logistique only                             |
+| `jean.dupont@neolia-energies.fr`       | Driver, Marseille             | The van GR-832-SJ in the driver app (Android, or http://localhost/conducteur) |
+| `camille.martin@neolia-energies.fr`    | Driver, Marseille             | Another driver of the same company                                            |
+| `atelier@garage-du-prado.fr`           | Garage                        | The garage space of Garage du Prado, Marseille                                |
+| `devis@carrosserie-vieux-port.fr`      | Garage                        | The garage space of Carrosserie du Vieux-Port, Marseille                      |
+| `extranet@arval.fr`                    | Lessor                        | The Arval contracts in the extranet v1                                        |
+| `extranet@ayvens.fr`                   | Lessor                        | The Ayvens contracts in the extranet v1                                       |
 
 The FleetPilot staff accounts (`claire.morel`, `theo.lambert`, `yanis.cherif`, `sophie.garnier`) live in an OpenLDAP
 directory federated by Keycloak; their LDAP groups become their roles.
@@ -121,19 +121,19 @@ directory federated by Keycloak; their LDAP groups become their roles.
 
 <br />
 
-|                    |                                                                                                              |
-| ------------------ | ------------------------------------------------------------------------------------------------------------ |
-| Client companies   | 3: a national energy company, a metropolitan authority and a transport SME, 17 sites, Marseille first        |
-| Vehicles           | 1,500 of real models: cars, vans, trucks and machinery, every energy, with registration, VIN and Crit'Air    |
-| Drivers            | 1,200 with their licence categories and current and past assignments                                         |
-| Lease contracts    | 1,113 with six lessors, and the projection of the mileage at the end of each one                             |
-| Deadlines          | 7,449: technical inspections, services, tyres, tachograph, end of contract                                   |
-| Claims             | 317, in every status of their lifecycle                                                                      |
-| Garages and quotes | 169 garages in 8 regions, 754 quotes with their analysis, negotiation and invoice                            |
-| Connected vehicles | 160 vehicles driving live on 201 real road routes, 67,000 days of usage history                              |
-| Driver app         | 7,152 fill-ups and charges, 1,596 inspections, typed from the real odometer of each vehicle                  |
+|                    |                                                                                                                |
+| ------------------ | -------------------------------------------------------------------------------------------------------------- |
+| Client companies   | 3: a national energy company, a metropolitan authority and a transport SME, 17 sites, Marseille first          |
+| Vehicles           | 1,500 of real models: cars, vans, trucks and machinery, every energy, with registration, VIN and Crit'Air      |
+| Drivers            | 1,200 with their licence categories and current and past assignments                                           |
+| Lease contracts    | 1,113 with six lessors, and the projection of the mileage at the end of each one                               |
+| Deadlines          | 7,449: technical inspections, services, tyres, tachograph, end of contract                                     |
+| Claims             | 317, in every status of their lifecycle                                                                        |
+| Garages and quotes | 169 garages in 8 regions, 754 quotes with their analysis, negotiation and invoice                              |
+| Connected vehicles | 160 vehicles driving live on 201 real road routes, 67,000 days of usage history                                |
+| Driver app         | 7,152 fill-ups and charges, 1,596 inspections, typed from the real odometer of each vehicle                    |
 | Partner files      | Garage XML quotes, lessor CSV invoices, 5,593 fuel card transactions, processed by the real integration routes |
-| E-mails            | About 900 e-mails already sent: reminders, purchase orders, alerts, claims                                   |
+| E-mails            | About 900 e-mails already sent: reminders, purchase orders, alerts, claims                                     |
 
 The data is generated with fixed seeds: every installation looks exactly the same, relative to the day it was
 installed.
@@ -495,76 +495,76 @@ service, errors and warnings, HTTP statuses, slowest routes, and every error wit
 
 ### Portal (fleet managers)
 
-| Module              | Capabilities                                                                                                                  |
-| ------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| Dashboard           | Fleet figures, energies, statuses, Crit'Air, costs, savings, connected vehicles, company selector                            |
+| Module              | Capabilities                                                                                                                |
+| ------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| Dashboard           | Fleet figures, energies, statuses, Crit'Air, costs, savings, connected vehicles, company selector                           |
 | Vehicles            | Search, filters, sort, creation with SIV and VIN validation, CSV import, file with 8 tabs, status changes, readings, return |
-| Drivers             | Licences, assignment rules per category, history of vehicles and kilometres, claims                                          |
-| Contracts           | Lease contracts of six lessors, contract file with progress and odometer, recording and ending, overrun risk                 |
-| Deadlines           | French rules, overdue / coming / planned, completion that schedules the next one, D-30 and D-7 reminders                     |
-| Claims              | Declaration, assessment, repair, closing, driver photos and GPS position, insurer follow-up                                   |
-| Live map and alerts | 160 vehicles live, statuses, kilometres of the day, alert centre with fault codes, speeding, battery, idling, service        |
-| Garage quotes       | Line by line analysis, automatic validation, counter-offer, double approval above 5,000 euros, invoice matching               |
-| Savings             | Savings by month, left to negotiate, automatic validation rate, contested invoices, anomalies, garages to watch               |
-| Garage network      | 169 garages, hourly rates, quality, approval, overpricing rate per garage                                                     |
-| Reference tariff    | Parts, standard times, regional hourly rates, analysis rules                                                                   |
-| Reports and costs   | TCO over 12 months, cost per km, claims rate, immobilisation, Excel and PDF reports built in the background                   |
-| Energy transition   | Electric eligibility from real usage, proposed model, yearly saving, CO2, low-emission zones, greening plan, LOM quotas       |
-| Fuel cards          | Transactions of the providers, spending per month, anomalies                                                                   |
-| Partner flows       | Console of the four integration flows, file upload, exchange detail, replay                                                    |
-| E-mail log          | Every e-mail sent, state, resend                                                                                               |
-| Client companies    | Identity, head office, contact, sites with their position, cost centers, activation (disables the accounts)                  |
-| User accounts       | Keycloak accounts per role and attachment, temporary password, disable and enable, staff from LDAP read only                  |
-| Settings            | Thresholds of the quote analysis and approval limits, electric models, low emission zones                                    |
+| Drivers             | Licences, assignment rules per category, history of vehicles and kilometres, claims                                         |
+| Contracts           | Lease contracts of six lessors, contract file with progress and odometer, recording and ending, overrun risk                |
+| Deadlines           | French rules, overdue / coming / planned, completion that schedules the next one, D-30 and D-7 reminders                    |
+| Claims              | Declaration, assessment, repair, closing, driver photos and GPS position, insurer follow-up                                 |
+| Live map and alerts | 160 vehicles live, statuses, kilometres of the day, alert centre with fault codes, speeding, battery, idling, service       |
+| Garage quotes       | Line by line analysis, automatic validation, counter-offer, double approval above 5,000 euros, invoice matching             |
+| Savings             | Savings by month, left to negotiate, automatic validation rate, contested invoices, anomalies, garages to watch             |
+| Garage network      | 169 garages, hourly rates, quality, approval, overpricing rate per garage                                                   |
+| Reference tariff    | Parts, standard times, regional hourly rates, analysis rules                                                                |
+| Reports and costs   | TCO over 12 months, cost per km, claims rate, immobilisation, Excel and PDF reports built in the background                 |
+| Energy transition   | Electric eligibility from real usage, proposed model, yearly saving, CO2, low-emission zones, greening plan, LOM quotas     |
+| Fuel cards          | Transactions of the providers, spending per month, anomalies                                                                |
+| Partner flows       | Console of the four integration flows, file upload, exchange detail, replay                                                 |
+| E-mail log          | Every e-mail sent, state, resend                                                                                            |
+| Client companies    | Identity, head office, contact, sites with their position, cost centers, activation (disables the accounts)                 |
+| User accounts       | Keycloak accounts per role and attachment, temporary password, disable and enable, staff from LDAP read only                |
+| Settings            | Thresholds of the quote analysis and approval limits, electric models, low emission zones                                   |
 | Activity journal    | Every business action with its author, role, company and record, filters, links to the records                              |
-| Profile             | Role and scope, password and account in Keycloak, language, last actions                                                     |
+| Profile             | Role and scope, password and account in Keycloak, language, last actions                                                    |
 
 ### Other applications
 
-| Application            | Capabilities                                                                                                     |
-| ---------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| Driver app (Android)   | Home, mileage, fill-up or charge, eight-point inspection with photos, claim with GPS and photos, garages nearby, notifications, offline outbox |
-| Driver app (PWA)       | The same features in the browser, installable on iPhone and Android                                              |
-| Garage space           | Dashboard, new quote from the tariff, counter-offers, invoices, own quotes only                                  |
-| Lessor extranet v1     | Running contracts, returns within 90 days, expected overruns, CSV export, return readings, own contracts only    |
-| Kibana                 | Connected fleet dashboard, application logs dashboard                                                            |
+| Application          | Capabilities                                                                                                                                   |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
+| Driver app (Android) | Home, mileage, fill-up or charge, eight-point inspection with photos, claim with GPS and photos, garages nearby, notifications, offline outbox |
+| Driver app (PWA)     | The same features in the browser, installable on iPhone and Android                                                                            |
+| Garage space         | Dashboard, new quote from the tariff, counter-offers, invoices, own quotes only                                                                |
+| Lessor extranet v1   | Running contracts, returns within 90 days, expected overruns, CSV export, return readings, own contracts only                                  |
+| Kibana               | Connected fleet dashboard, application logs dashboard                                                                                          |
 
 ### Platform
 
-| Capability           | Details                                                                                                                      |
-| -------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| Single sign-on       | Keycloak 26, OpenID Connect with PKCE, OpenLDAP federation for the staff, 6 roles, themed sign-in page                       |
-| Tenant isolation     | Company, driver, garage and lessor taken from the token on every request: another company's vehicle is "not found"         |
-| APIs                 | REST on every service with OpenAPI (Swagger UI on each service), one GraphQL schema for the portal |
-| Errors               | RFC 9457 problem details with a stable code, the rule that failed for each field (translated by the portal), correlation id |
-| Events               | Transactional outbox to Kafka, idempotent consumers, dead letter handling                                                    |
-| Background work      | JMS queues on ActiveMQ for e-mails and reports, sent once, retried                                                           |
-| Integration          | Apache Camel routes for XML, CSV and REST partners, journal, idempotence, replay                                             |
-| Documents            | Purchase orders and reports as PDF, reports as Excel, 10 e-mail templates                                                    |
-| Scheduled jobs       | Daily sweep (deadline reminders, lease overrun warnings), insurer follow-up, telemetry purge, energy analyses               |
-| Observability        | JSON logs in Elastic Common Schema, correlation id from Nginx to the logs, health checks on every container                  |
+| Capability       | Details                                                                                                                     |
+| ---------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| Single sign-on   | Keycloak 26, OpenID Connect with PKCE, OpenLDAP federation for the staff, 6 roles, themed sign-in page                      |
+| Tenant isolation | Company, driver, garage and lessor taken from the token on every request: another company's vehicle is "not found"          |
+| APIs             | REST on every service with OpenAPI (Swagger UI on each service), one GraphQL schema for the portal                          |
+| Errors           | RFC 9457 problem details with a stable code, the rule that failed for each field (translated by the portal), correlation id |
+| Events           | Transactional outbox to Kafka, idempotent consumers, dead letter handling                                                   |
+| Background work  | JMS queues on ActiveMQ for e-mails and reports, sent once, retried                                                          |
+| Integration      | Apache Camel routes for XML, CSV and REST partners, journal, idempotence, replay                                            |
+| Documents        | Purchase orders and reports as PDF, reports as Excel, 10 e-mail templates                                                   |
+| Scheduled jobs   | Daily sweep (deadline reminders, lease overrun warnings), insurer follow-up, telemetry purge, energy analyses               |
+| Observability    | JSON logs in Elastic Common Schema, correlation id from Nginx to the logs, health checks on every container                 |
 
 ## Tech stack
 
-| Layer               | Technology                                                                         | Why                                                                                              |
-| ------------------- | ---------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
-| Language            | **Java 25**                                                                        | Records, sealed types, pattern matching, virtual threads; the language of the services and of the Android app |
-| Services            | **Spring Boot 4.1**, Spring Security, Spring Data JPA, **Hibernate 7**             | One coherent framework for REST, security, persistence, messaging and tests                      |
-| Database            | **PostgreSQL 18**, Flyway                                                          | One database per service, versioned migrations, distance search in SQL, JSONB                   |
-| Events              | **Kafka 4** (KRaft), Kafka Streams                                                 | Business events between services, telemetry flows, real-time analytics                          |
-| Work queues         | **ActiveMQ Classic 6** (JMS)                                                       | E-mails and reports done once by one worker, with retries                                        |
-| Integration bus     | **Apache Camel 4.22**                                                              | The engine of Red Hat JBoss Fuse and its successor, on Spring Boot |
-| API for the portal  | **Spring for GraphQL**                                                             | One schema for the portal, DataLoader against N+1, user token relayed to the services            |
-| Identity            | **Keycloak 26**, **OpenLDAP**                                                      | Single sign-on for every application, staff directory, roles from LDAP groups                    |
-| Portal              | **Nuxt 4**, Vue 3, TypeScript, PWA, Leaflet, i18n (fr, en)                         | Typed single-page app served by Nginx, installable with offline support, hand-written design system |
-| Mobile              | **Android in Java**, MVVM, Retrofit, Room, AppAuth, WorkManager, osmdroid          | A native app for the drivers, offline first                                                      |
-| Legacy              | Servlets and JSP, **Tomcat 11**, **Apache httpd 2.4**                              | The existing application, kept and modernised in place                                           |
-| Entry point         | **Nginx**                                                                          | One origin for the portal and every API, correlation id, Server-Sent Events                      |
-| Documents           | OpenHTMLtoPDF, Apache POI, Thymeleaf                                               | PDF purchase orders and reports, Excel exports, HTML e-mails                                     |
-| Analytics and logs  | **Elasticsearch, Logstash, Kibana 9**, Filebeat                                    | Centralised logs and analytics dashboards, generated as code                                     |
-| Tests               | JUnit 5, Mockito, AssertJ, Testcontainers, **Cucumber** (French), **Selenium WebDriver**, **Cypress**, Playwright, Vitest, Espresso | Every level, from the domain rules to the browser and the phone       |
-| Quality and CI      | Maven Wrapper, JaCoCo, Checkstyle, **SonarQube**, GitHub Actions, GitLab CI        | A quality gate on every change                                                                   |
-| Containers          | **Docker**, Docker Compose with health checks and profiles                         | The whole platform with one command, Linux containers                                            |
+| Layer              | Technology                                                                                                                          | Why                                                                                                           |
+| ------------------ | ----------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| Language           | **Java 25**                                                                                                                         | Records, sealed types, pattern matching, virtual threads; the language of the services and of the Android app |
+| Services           | **Spring Boot 4.1**, Spring Security, Spring Data JPA, **Hibernate 7**                                                              | One coherent framework for REST, security, persistence, messaging and tests                                   |
+| Database           | **PostgreSQL 18**, Flyway                                                                                                           | One database per service, versioned migrations, distance search in SQL, JSONB                                 |
+| Events             | **Kafka 4** (KRaft), Kafka Streams                                                                                                  | Business events between services, telemetry flows, real-time analytics                                        |
+| Work queues        | **ActiveMQ Classic 6** (JMS)                                                                                                        | E-mails and reports done once by one worker, with retries                                                     |
+| Integration bus    | **Apache Camel 4.22**                                                                                                               | The engine of Red Hat JBoss Fuse and its successor, on Spring Boot                                            |
+| API for the portal | **Spring for GraphQL**                                                                                                              | One schema for the portal, DataLoader against N+1, user token relayed to the services                         |
+| Identity           | **Keycloak 26**, **OpenLDAP**                                                                                                       | Single sign-on for every application, staff directory, roles from LDAP groups                                 |
+| Portal             | **Nuxt 4**, Vue 3, TypeScript, PWA, Leaflet, i18n (fr, en)                                                                          | Typed single-page app served by Nginx, installable with offline support, hand-written design system           |
+| Mobile             | **Android in Java**, MVVM, Retrofit, Room, AppAuth, WorkManager, osmdroid                                                           | A native app for the drivers, offline first                                                                   |
+| Legacy             | Servlets and JSP, **Tomcat 11**, **Apache httpd 2.4**                                                                               | The existing application, kept and modernised in place                                                        |
+| Entry point        | **Nginx**                                                                                                                           | One origin for the portal and every API, correlation id, Server-Sent Events                                   |
+| Documents          | OpenHTMLtoPDF, Apache POI, Thymeleaf                                                                                                | PDF purchase orders and reports, Excel exports, HTML e-mails                                                  |
+| Analytics and logs | **Elasticsearch, Logstash, Kibana 9**, Filebeat                                                                                     | Centralised logs and analytics dashboards, generated as code                                                  |
+| Tests              | JUnit 5, Mockito, AssertJ, Testcontainers, **Cucumber** (French), **Selenium WebDriver**, **Cypress**, Playwright, Vitest, Espresso | Every level, from the domain rules to the browser and the phone                                               |
+| Quality and CI     | Maven Wrapper, JaCoCo, Checkstyle, **SonarQube**, GitHub Actions, GitLab CI                                                         | A quality gate on every change                                                                                |
+| Containers         | **Docker**, Docker Compose with health checks and profiles                                                                          | The whole platform with one command, Linux containers                                                         |
 
 ## Architecture
 
@@ -596,19 +596,19 @@ flowchart LR
     keycloak[Keycloak + OpenLDAP] -. tokens .-> portal & android & tomcat & services
 ```
 
-| Service                | Port | Responsibility                                                                                   |
-| ---------------------- | ---- | ------------------------------------------------------------------------------------------------ |
-| `vehicle-service`      | 8081 | Vehicles, drivers, leases, deadlines, claims, driver app API, administration, activity journal  |
-| `graphql-gateway`      | 8082 | GraphQL schema of the portal, calls the services with the user's token                           |
-| `quote-service`        | 8083 | Garages, reference tariff, quote analysis and negotiation, invoices, savings                     |
-| `notification-service` | 8084 | Events turned into e-mails and PDF, sent through ActiveMQ, e-mail log                            |
-| `reporting-service`    | 8085 | Indicators, Excel and PDF reports built in the background                                        |
-| `telemetry-service`    | 8086 | Ingestion of the boxes, trips, alert rules, live map, usage history                             |
-| `vehicle-simulator`    | 8087 | 160 connected vehicles on real routes, published to Kafka                                        |
-| `integration-esb`      | 8088 | Apache Camel routes: garages, lessors, fuel cards, insurer                                       |
-| `bigdata-pipeline`     | 8089 | Kafka Streams analytics to Elasticsearch                                                         |
-| `energy-service`       | 8090 | Electric eligibility, costs, CO2, low-emission zones, greening plan                              |
-| `legacy-portal-war`    | 8095 | Lessor extranet v1, WAR on Tomcat behind Apache httpd                                            |
+| Service                | Port | Responsibility                                                                                 |
+| ---------------------- | ---- | ---------------------------------------------------------------------------------------------- |
+| `vehicle-service`      | 8081 | Vehicles, drivers, leases, deadlines, claims, driver app API, administration, activity journal |
+| `graphql-gateway`      | 8082 | GraphQL schema of the portal, calls the services with the user's token                         |
+| `quote-service`        | 8083 | Garages, reference tariff, quote analysis and negotiation, invoices, savings                   |
+| `notification-service` | 8084 | Events turned into e-mails and PDF, sent through ActiveMQ, e-mail log                          |
+| `reporting-service`    | 8085 | Indicators, Excel and PDF reports built in the background                                      |
+| `telemetry-service`    | 8086 | Ingestion of the boxes, trips, alert rules, live map, usage history                            |
+| `vehicle-simulator`    | 8087 | 160 connected vehicles on real routes, published to Kafka                                      |
+| `integration-esb`      | 8088 | Apache Camel routes: garages, lessors, fuel cards, insurer                                     |
+| `bigdata-pipeline`     | 8089 | Kafka Streams analytics to Elasticsearch                                                       |
+| `energy-service`       | 8090 | Electric eligibility, costs, CO2, low-emission zones, greening plan                            |
+| `legacy-portal-war`    | 8095 | Lessor extranet v1, WAR on Tomcat behind Apache httpd                                          |
 
 Key implementation choices:
 
@@ -647,17 +647,17 @@ Every level is tested, from the rules of the domain to a real browser and a real
 start real PostgreSQL, Kafka, ActiveMQ and Elasticsearch containers (Testcontainers); the end-to-end suites run
 against the whole platform started with Docker Compose.
 
-| Suite                                | Tests          | What it covers                                                                                      |
-| ------------------------------------ | -------------- | --------------------------------------------------------------------------------------------------- |
-| Java services, unit and integration  | 417            | Domain rules, REST API with real tokens, isolation between companies, Kafka, JMS, Camel routes, SMTP |
-| Cucumber scenarios in French         | 22 (in the 417) | Rules written for the business: assignments, deadlines and contracts, isolation, overpriced quotes |
-| Selenium WebDriver + Cucumber        | 11 scenarios   | Real journeys in Chrome on the running platform: sign-in, fleet, quotes, telemetry, transition, driver, extranet, administration |
-| Cypress                              | 49             | Journeys through every module, and every form sent once with a mistake (explained in French) and once valid |
-| Playwright, PWA                      | 21             | The PWA on iPhone (WebKit) and Android (Chromium) profiles, offline mode, installability            |
-| Playwright, site crawler             | 10             | Five accounts, every reachable page (about 150) on a desktop and on a phone: no server or JavaScript error, no error screen, broken image, untranslated text or sideways scrolling |
-| Vitest                               | 17             | Portal logic: GraphQL errors, offline outbox, components, mileage curve                            |
-| Legacy WAR                           | 18             | Unit tests and scenarios on an embedded Tomcat with a fake Keycloak and a fake API                  |
-| Android                              | 17 + 6         | JUnit (outbox sender, rules on the phone) and Espresso on the emulator, one journey on the platform |
+| Suite                               | Tests           | What it covers                                                                                                                                                                     |
+| ----------------------------------- | --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Java services, unit and integration | 417             | Domain rules, REST API with real tokens, isolation between companies, Kafka, JMS, Camel routes, SMTP                                                                               |
+| Cucumber scenarios in French        | 22 (in the 417) | Rules written for the business: assignments, deadlines and contracts, isolation, overpriced quotes                                                                                 |
+| Selenium WebDriver + Cucumber       | 11 scenarios    | Real journeys in Chrome on the running platform: sign-in, fleet, quotes, telemetry, transition, driver, extranet, administration                                                   |
+| Cypress                             | 49              | Journeys through every module, and every form sent once with a mistake (explained in French) and once valid                                                                        |
+| Playwright, PWA                     | 21              | The PWA on iPhone (WebKit) and Android (Chromium) profiles, offline mode, installability                                                                                           |
+| Playwright, site crawler            | 10              | Five accounts, every reachable page (about 150) on a desktop and on a phone: no server or JavaScript error, no error screen, broken image, untranslated text or sideways scrolling |
+| Vitest                              | 17              | Portal logic: GraphQL errors, offline outbox, components, mileage curve                                                                                                            |
+| Legacy WAR                          | 18              | Unit tests and scenarios on an embedded Tomcat with a fake Keycloak and a fake API                                                                                                 |
+| Android                             | 17 + 6          | JUnit (outbox sender, rules on the phone) and Espresso on the emulator, one journey on the platform                                                                                |
 
 ```bash
 cd back
@@ -741,4 +741,3 @@ created (test claims, fill-ups, readings, quotes, and what followed them in the 
 9094 (Kafka), 1389 (LDAP), 8081 to 8090 (services), plus 5601 and 9200 with the `observability` profile.
 
 </details>
-# FleetPilot
