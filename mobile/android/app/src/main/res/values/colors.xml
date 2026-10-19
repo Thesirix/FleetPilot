@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Same tokens as the web portal (front/app/assets/css/tokens.css): neutral greys, one teal accent. -->
+<resources>
+    <color name="primary">#FF0F766E</color>
+    <color name="primary_dark">#FF115E59</color>
+    <color name="primary_soft">#FFE6F4F2</color>
+    <color name="on_primary">#FFFFFFFF</color>
+
+    <color name="bg">#FFF5F6F8</color>
+    <color name="surface">#FFFFFFFF</color>
+    <color name="border">#FFE3E6EB</color>
+    <color name="border_strong">#FFCFD4DC</color>
+
+    <color name="text">#FF101828</color>
+    <color name="text_secondary">#FF475467</color>
+    <color name="text_muted">#FF667085</color>
+
+    <color name="success">#FF067647</color>
+    <color name="success_soft">#FFECFDF3</color>
+    <color name="warning">#FFB54708</color>
+    <color name="warning_soft">#FFFFFAEB</color>
+    <color name="danger">#FFB42318</color>
+    <color name="danger_soft">#FFFEF3F2</color>
+    <color name="info">#FF175CD3</color>
+    <color name="info_soft">#FFEFF8FF</color>
+    <color name="neutral_soft">#FFF2F4F7</color>
+
+    <color name="critair_e">#FF22A06B</color>
+    <color name="critair_1">#FF8B5CF6</color>
+    <color name="critair_2">#FFEAB308</color>
+    <color name="critair_3">#FFF97316</color>
+    <color name="critair_4">#FF7C2D12</color>
+    <color name="critair_5">#FF4B5563</color>
+    <!-- Shortcuts of the home screen: one colour per action -->
+    <color name="tone_amber">#FFB54708</color>
+    <color name="tone_amber_soft">#FFFEF0C7</color>
+    <color name="tone_teal">#FF0F766E</color>
+    <color name="tone_teal_soft">#FFCCFBF1</color>
+    <color name="tone_red">#FFB42318</color>
+    <color name="tone_red_soft">#FFFEE4E2</color>
+    <color name="tone_blue">#FF175CD3</color>
+    <color name="tone_blue_soft">#FFDBEAFE</color>
+    <color name="hero_text_soft">#D9FFFFFF</color>
+    <color name="mint">#FF5EEAD4</color>
+    <!-- Not exactly the surface colour: Material 3 would tint a surface-coloured button with the primary colour -->
+    <color name="hero_button">#FFFEFFFF</color>
+</resources>

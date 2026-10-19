@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The camera app writes the photo here; the app then resizes it into its private outbox folder. -->
+<paths>
+    <cache-path name="camera" path="camera/" />
+</paths>

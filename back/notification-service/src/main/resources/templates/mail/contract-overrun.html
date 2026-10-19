@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{mail/layout :: email(~{::title}, ~{::section})}" lang="fr">
+<head><title th:text="|Dépassement kilométrique prévu : contrat ${contractNumber} (${registration})|">Dépassement</title></head>
+<body>
+<section>
+  <p style="margin:0 0 14px;">Bonjour,</p>
+  <p style="margin:0 0 14px;">
+    Au rythme actuel, le véhicule <strong th:text="${registration}">AB-123-CD</strong> dépassera de
+    <strong th:text="|${fmt.number(projectedOverrunKm)} km|">0 km</strong> le kilométrage de son contrat de location
+    chez <span th:text="${lessor}">loueur</span>. Renégocier le contrat maintenant coûte moins cher que payer les
+    kilomètres supplémentaires à la restitution.
+  </p>
+  <table th:replace="~{mail/fragments :: facts(${ { {'Contrat', contractNumber}, {'Loueur', lessor},
+      {'Kilométrage contractuel', fmt.number(contractualMileage) + ' km'},
+      {'Kilométrage prévu en fin de contrat', fmt.number(projectedMileage) + ' km'},
+      {'Fin du contrat', fmt.date(endDate)} } })}"></table>
+  <a th:replace="~{mail/fragments :: button(${portalUrl + '/vehicules/' + vehicleId}, 'Ouvrir la fiche du véhicule')}"></a>
+</section>
+</body>
+</html>

@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{mail/layout :: email(~{::title}, ~{::section})}" lang="fr">
+<head><title th:text="|Le véhicule ${registration} vous est attribué|">Véhicule attribué</title></head>
+<body>
+<section>
+  <p style="margin:0 0 14px;">Bonjour<span th:if="${driverName}" th:text="| ${driverName}|"></span>,</p>
+  <p style="margin:0 0 14px;">
+    Le véhicule <strong th:text="${registration}">AB-123-CD</strong> vous est remis
+    (<span th:text="${fmt.label(kind)}">attribution</span>) à partir du
+    <strong th:text="${fmt.date(startDate)}">date</strong>.
+  </p>
+  <p th:replace="~{mail/fragments :: note('Relevez le kilométrage à la prise du véhicule et signalez tout dommage depuis votre application conducteur FleetPilot.')}"></p>
+  <a th:replace="~{mail/fragments :: button(${portalUrl + '/conducteur'}, 'Ouvrir mon espace conducteur')}"></a>
+</section>
+</body>
+</html>

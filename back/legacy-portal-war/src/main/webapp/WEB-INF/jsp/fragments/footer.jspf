@@ -1,0 +1,7 @@
+</main>
+<footer class="footer">
+    <span>FleetPilot · Extranet loueurs v1</span>
+    <span>Application historique (servlets et JSP) servie par Tomcat derrière Apache httpd, connexion unique Keycloak.</span>
+</footer>
+</body>
+</html>

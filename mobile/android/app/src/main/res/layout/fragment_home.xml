@@ -1,0 +1,516 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.swiperefreshlayout.widget.SwipeRefreshLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/refresh"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/scroll"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <TextView
+                android:id="@+id/hello"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textAppearance="@style/Text.Title"
+                tools:text="Bonjour Karim" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="@string/hello_subtitle"
+                android:textAppearance="@style/Text.Secondary" />
+
+            <TextView
+                android:id="@+id/stale"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/bg_outbox_pill"
+                android:padding="10dp"
+                android:text="@string/stale_banner"
+                android:textColor="@color/warning"
+                android:textSize="13sp"
+                android:visibility="gone" />
+
+            <!-- My vehicle: the brand gradient and a real number plate, as in the web app -->
+            <FrameLayout
+                android:id="@+id/vehicle_card"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:background="@drawable/bg_vehicle_hero"
+                android:elevation="6dp"
+                android:outlineProvider="background">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="18dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:letterSpacing="0.06"
+                            android:text="@string/my_vehicle"
+                            android:textAllCaps="true"
+                            android:textColor="@color/hero_text_soft"
+                            android:textSize="11sp"
+                            android:textStyle="bold" />
+
+                        <!-- The Crit'Air sticker, named: a "2" alone is not understood -->
+                        <TextView
+                            android:id="@+id/critair"
+                            android:layout_width="wrap_content"
+                            android:layout_height="26dp"
+                            android:background="@drawable/bg_pill"
+                            android:gravity="center"
+                            android:paddingHorizontal="11dp"
+                            android:textColor="@android:color/white"
+                            android:textSize="12sp"
+                            android:textStyle="bold"
+                            tools:text="Crit'Air 2" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/no_vehicle"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:text="@string/no_vehicle"
+                        android:textColor="@android:color/white"
+                        android:visibility="gone" />
+
+                    <LinearLayout
+                        android:id="@+id/vehicle"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical">
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="10dp"
+                            android:background="@drawable/bg_plate"
+                            android:elevation="3dp"
+                            android:orientation="horizontal"
+                            android:padding="2dp">
+
+                            <TextView
+                                android:layout_width="20dp"
+                                android:layout_height="match_parent"
+                                android:background="@drawable/bg_plate_eu"
+                                android:gravity="bottom|center_horizontal"
+                                android:paddingBottom="3dp"
+                                android:text="F"
+                                android:textColor="@android:color/white"
+                                android:textSize="10sp"
+                                android:textStyle="bold"
+                                tools:ignore="HardcodedText" />
+
+                            <TextView
+                                android:id="@+id/plate"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:fontFamily="monospace"
+                                android:letterSpacing="0.06"
+                                android:paddingHorizontal="12dp"
+                                android:paddingVertical="3dp"
+                                android:textColor="#FF101828"
+                                android:textSize="24sp"
+                                android:textStyle="bold"
+                                tools:text="GR-832-SJ" />
+                        </LinearLayout>
+
+                        <TextView
+                            android:id="@+id/model"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="10dp"
+                            android:textColor="@color/hero_text_soft"
+                            android:textSize="14sp"
+                            tools:text="Citroën Berlingo Van" />
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="14dp"
+                            android:orientation="horizontal">
+
+                            <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_marginEnd="6dp"
+                                android:layout_weight="1"
+                                android:background="@drawable/bg_glass"
+                                android:orientation="vertical"
+                                android:padding="10dp">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/mileage"
+                                    android:textColor="@color/hero_text_soft"
+                                    android:textSize="11sp" />
+
+                                <TextView
+                                    android:id="@+id/mileage"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:maxLines="1"
+                                    android:textColor="@android:color/white"
+                                    android:textSize="14sp"
+                                    android:textStyle="bold"
+                                    tools:text="33 373 km" />
+                            </LinearLayout>
+
+                            <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_marginHorizontal="3dp"
+                                android:layout_weight="1"
+                                android:background="@drawable/bg_glass"
+                                android:orientation="vertical"
+                                android:padding="10dp">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/energy"
+                                    android:textColor="@color/hero_text_soft"
+                                    android:textSize="11sp" />
+
+                                <TextView
+                                    android:id="@+id/energy"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:maxLines="1"
+                                    android:textColor="@android:color/white"
+                                    android:textSize="14sp"
+                                    android:textStyle="bold"
+                                    tools:text="Diesel" />
+                            </LinearLayout>
+
+                            <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_marginStart="6dp"
+                                android:layout_weight="1"
+                                android:background="@drawable/bg_glass"
+                                android:orientation="vertical"
+                                android:padding="10dp">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="@string/site"
+                                    android:textColor="@color/hero_text_soft"
+                                    android:textSize="11sp" />
+
+                                <TextView
+                                    android:id="@+id/site"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:ellipsize="end"
+                                    android:maxLines="1"
+                                    android:textColor="@android:color/white"
+                                    android:textSize="14sp"
+                                    android:textStyle="bold"
+                                    tools:text="Marseille - Arenc" />
+                            </LinearLayout>
+                        </LinearLayout>
+
+                        <!-- Lease contract: the kilometres used against the mileage allowed -->
+                        <LinearLayout
+                            android:id="@+id/contract"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="12dp"
+                            android:orientation="vertical"
+                            android:visibility="gone">
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:orientation="horizontal">
+
+                                <TextView
+                                    android:id="@+id/contract_label"
+                                    android:layout_width="0dp"
+                                    android:layout_height="wrap_content"
+                                    android:layout_weight="1"
+                                    android:textColor="@color/hero_text_soft"
+                                    android:textSize="13sp"
+                                    tools:text="Contrat Ayvens" />
+
+                                <TextView
+                                    android:id="@+id/contract_use"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:textColor="@android:color/white"
+                                    android:textSize="13sp"
+                                    android:textStyle="bold"
+                                    tools:text="21 400 km sur 60 000 km" />
+                            </LinearLayout>
+
+                            <com.google.android.material.progressindicator.LinearProgressIndicator
+                                android:id="@+id/contract_bar"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_marginTop="6dp"
+                                app:indicatorColor="@color/mint"
+                                app:trackColor="#33FFFFFF"
+                                app:trackCornerRadius="3dp"
+                                app:trackThickness="6dp" />
+                        </LinearLayout>
+
+                        <TextView
+                            android:id="@+id/month_km"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="12dp"
+                            android:textColor="@color/hero_text_soft"
+                            android:textSize="13sp"
+                            android:visibility="gone"
+                            tools:text="462 km parcourus ces 30 derniers jours" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/report_mileage"
+                            android:layout_width="match_parent"
+                            android:layout_height="52dp"
+                            android:layout_marginTop="14dp"
+                            app:backgroundTint="@color/hero_button"
+                            android:text="@string/report_mileage"
+                            android:textColor="@color/primary_dark"
+                            app:icon="@drawable/ic_speed"
+                            app:iconGravity="textStart"
+                            app:iconTint="@color/primary_dark" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/open_vehicle"
+                            style="@style/Widget.Material3.Button.TextButton"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:text="@string/vehicle_details"
+                            android:textAllCaps="false"
+                            android:textColor="@android:color/white" />
+                    </LinearLayout>
+                </LinearLayout>
+            </FrameLayout>
+
+            <!-- The next deadline, put forward -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/next_card"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:visibility="gone">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
+
+                    <View
+                        android:id="@+id/next_bar"
+                        android:layout_width="4dp"
+                        android:layout_height="match_parent"
+                        android:background="@color/info" />
+
+                    <ImageView
+                        android:id="@+id/next_icon"
+                        android:layout_width="40dp"
+                        android:layout_height="40dp"
+                        android:layout_marginStart="12dp"
+                        android:background="@drawable/bg_icon_tile"
+                        android:contentDescription="@null"
+                        android:padding="9dp"
+                        android:src="@drawable/ic_calendar"
+                        app:tint="@color/info" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical"
+                        android:paddingHorizontal="12dp"
+                        android:paddingVertical="12dp">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/next_deadline"
+                            android:textAppearance="@style/Text.Muted" />
+
+                        <TextView
+                            android:id="@+id/next_type"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textAppearance="@style/Text.Body"
+                            android:textStyle="bold"
+                            tools:text="Révision" />
+
+                        <TextView
+                            android:id="@+id/next_due"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textAppearance="@style/Text.Secondary"
+                            tools:text="Dans 47 jours" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/next_badge"
+                        android:layout_width="wrap_content"
+                        android:layout_height="24dp"
+                        android:layout_marginEnd="14dp"
+                        android:background="@drawable/bg_pill"
+                        android:gravity="center"
+                        android:paddingHorizontal="10dp"
+                        android:textSize="12sp"
+                        android:textStyle="bold"
+                        tools:text="Planifiée" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Outbox -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/outbox_card"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:visibility="gone"
+                app:strokeColor="@color/warning">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal"
+                        android:paddingStart="16dp"
+                        android:paddingEnd="8dp"
+                        android:paddingVertical="4dp">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:drawablePadding="8dp"
+                            android:gravity="center_vertical"
+                            android:text="@string/outbox_title"
+                            android:textAppearance="@style/Text.Section"
+                            app:drawableStartCompat="@drawable/ic_cloud_off"
+                            app:drawableTint="@color/warning" />
+
+                        <com.google.android.material.button.MaterialButton
+                            android:id="@+id/outbox_retry"
+                            style="@style/Widget.Material3.Button.TextButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/retry"
+                            android:textAllCaps="false" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/outbox_list"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Quick actions -->
+            <GridLayout
+                android:id="@+id/actions"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:columnCount="2"
+                android:useDefaultMargins="false">
+
+                <include
+                    android:id="@+id/action_fuel"
+                    layout="@layout/item_action"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_marginEnd="5dp"
+                    android:layout_marginBottom="10dp" />
+
+                <include
+                    android:id="@+id/action_inspection"
+                    layout="@layout/item_action"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_marginStart="5dp"
+                    android:layout_marginBottom="10dp" />
+
+                <include
+                    android:id="@+id/action_incident"
+                    layout="@layout/item_action"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_marginEnd="5dp" />
+
+                <include
+                    android:id="@+id/action_garages"
+                    layout="@layout/item_action"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_columnWeight="1"
+                    android:layout_marginStart="5dp" />
+            </GridLayout>
+
+            <!-- Notifications -->
+            <include
+                android:id="@+id/notifications"
+                layout="@layout/view_list_card"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp" />
+
+            <!-- Deadlines -->
+            <include
+                android:id="@+id/deadlines"
+                layout="@layout/view_list_card"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp" />
+
+            <!-- Claims -->
+            <include
+                android:id="@+id/incidents"
+                layout="@layout/view_list_card"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp" />
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+</androidx.swiperefreshlayout.widget.SwipeRefreshLayout>

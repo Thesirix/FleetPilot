@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{mail/layout :: email(~{::title}, ~{::section})}" lang="fr">
+<head><title th:text="|Votre devis ${reference} n'est pas retenu|">Devis refusé</title></head>
+<body>
+<section>
+  <p style="margin:0 0 14px;">Bonjour<span th:if="${recipientName}" th:text="| ${recipientName}|"></span>,</p>
+  <p style="margin:0 0 14px;">
+    Votre devis <strong th:text="${reference}">DEV</strong> pour le véhicule
+    <strong th:text="${registration}">AB-123-CD</strong> n'est pas retenu par le gestionnaire de flotte.
+    Merci de ne pas engager les travaux.
+  </p>
+  <p th:if="${comment}" th:replace="~{mail/fragments :: note(${'Motif : ' + comment})}"></p>
+  <a th:replace="~{mail/fragments :: button(${portalUrl + '/devis/' + quoteId}, 'Voir le devis')}"></a>
+</section>
+</body>
+</html>

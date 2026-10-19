@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/tab_home" android:icon="@drawable/ic_home" android:title="@string/tab_home" />
+    <item android:id="@+id/tab_fuel" android:icon="@drawable/ic_fuel" android:title="@string/tab_fuel" />
+    <item android:id="@+id/tab_inspection" android:icon="@drawable/ic_inspection" android:title="@string/tab_inspection" />
+    <item android:id="@+id/tab_incident" android:icon="@drawable/ic_incident" android:title="@string/tab_incident" />
+    <item android:id="@+id/tab_garages" android:icon="@drawable/ic_place" android:title="@string/tab_garages" />
+</menu>

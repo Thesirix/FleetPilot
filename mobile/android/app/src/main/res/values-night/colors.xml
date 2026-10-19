@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Dark theme: same hues, surfaces of the night. -->
+<resources>
+    <color name="primary">#FF2DD4BF</color>
+    <color name="primary_dark">#FF14B8A6</color>
+    <color name="primary_soft">#FF0F2E2B</color>
+    <color name="on_primary">#FF042F2E</color>
+
+    <color name="bg">#FF0B0F14</color>
+    <color name="surface">#FF141A21</color>
+    <color name="border">#FF26303B</color>
+    <color name="border_strong">#FF374351</color>
+
+    <color name="text">#FFF2F4F7</color>
+    <color name="text_secondary">#FFC4CCD6</color>
+    <color name="text_muted">#FF94A0AE</color>
+
+    <color name="success">#FF4ADE80</color>
+    <color name="success_soft">#FF0F2A1B</color>
+    <color name="warning">#FFFBBF24</color>
+    <color name="warning_soft">#FF2E2410</color>
+    <color name="danger">#FFF87171</color>
+    <color name="danger_soft">#FF34171A</color>
+    <color name="info">#FF60A5FA</color>
+    <color name="info_soft">#FF14233A</color>
+    <color name="neutral_soft">#FF1D2530</color>
+</resources>

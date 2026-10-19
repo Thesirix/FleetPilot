@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{mail/layout :: email(~{::title}, ~{::section})}" lang="fr">
+<head>
+  <title th:text="|Alerte critique : ${fmt.label(type)} sur ${registration}|">Alerte critique</title>
+</head>
+<body>
+<section>
+  <p style="margin:0 0 14px;">Bonjour,</p>
+  <p style="margin:0 0 14px;padding:10px 14px;border-radius:8px;background:#fef3f2;color:#b42318;">
+    <strong>Le boîtier du véhicule <span th:text="${registration}">AB-123-CD</span> signale un problème grave.</strong>
+    Demandez au conducteur de s'arrêter dès que possible et organisez la prise en charge par un garage.
+  </p>
+  <table th:replace="~{mail/fragments :: facts(${ { {'Véhicule', registration}, {'Problème', message},
+      {'Détecté le', fmt.dateTime(raisedAt)} } })}"></table>
+  <p th:if="${latitude != null}" style="margin:14px 0 0;color:#475467;">
+    Dernière position connue :
+    <a th:href="|https://www.openstreetmap.org/?mlat=${latitude}&mlon=${longitude}#map=15/${latitude}/${longitude}|"
+       th:text="|${latitude}, ${longitude}|" href="#" style="color:#1d4ed8;">43.29, 5.37</a>
+  </p>
+  <a th:replace="~{mail/fragments :: button(${portalUrl + '/alertes'}, 'Voir les alertes du parc')}"></a>
+</section>
+</body>
+</html>

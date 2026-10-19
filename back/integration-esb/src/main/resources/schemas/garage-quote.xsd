@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Quote sent by a garage's management software (format "devis garage" version 1).
+  Every file dropped by a garage is validated against this schema before anything else.
+-->
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns="urn:fleetpilot:devis-garage:1"
+           targetNamespace="urn:fleetpilot:devis-garage:1"
+           elementFormDefault="qualified">
+
+  <xs:element name="devis">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="emetteur" type="Emetteur"/>
+        <xs:element name="reference" type="Texte40"/>
+        <xs:element name="dateEmission" type="xs:date"/>
+        <xs:element name="vehicule" type="Vehicule"/>
+        <xs:element name="objet" type="Texte1000"/>
+        <xs:element name="lignes" type="Lignes"/>
+        <xs:element name="totalHT" type="Montant"/>
+      </xs:sequence>
+      <xs:attribute name="version" type="xs:string" use="required" fixed="1.0"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:complexType name="Emetteur">
+    <xs:simpleContent>
+      <xs:extension base="Texte120">
+        <xs:attribute name="siret" use="required">
+          <xs:simpleType>
+            <xs:restriction base="xs:string">
+              <xs:pattern value="\d{14}"/>
+            </xs:restriction>
+          </xs:simpleType>
+        </xs:attribute>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
+  <xs:complexType name="Vehicule">
+    <xs:attribute name="immatriculation" use="required">
+      <xs:simpleType>
+        <xs:restriction base="xs:string">
+          <xs:pattern value="[A-Z]{2}-\d{3}-[A-Z]{2}"/>
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+    <xs:attribute name="kilometrage" type="xs:nonNegativeInteger"/>
+  </xs:complexType>
+
+  <xs:complexType name="Lignes">
+    <xs:sequence>
+      <xs:element name="ligne" type="Ligne" minOccurs="1" maxOccurs="60"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <xs:complexType name="Ligne">
+    <xs:sequence>
+      <xs:element name="libelle" type="Texte200"/>
+      <xs:element name="quantite">
+        <xs:simpleType>
+          <xs:restriction base="xs:decimal">
+            <xs:minExclusive value="0"/>
+            <xs:fractionDigits value="2"/>
+          </xs:restriction>
+        </xs:simpleType>
+      </xs:element>
+      <xs:element name="prixUnitaireHT" type="Montant"/>
+    </xs:sequence>
+    <xs:attribute name="nature" use="required">
+      <xs:simpleType>
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="PIECE"/>
+          <xs:enumeration value="MAIN_OEUVRE"/>
+          <xs:enumeration value="INGREDIENTS"/>
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+    <xs:attribute name="code" type="Texte30"/>
+  </xs:complexType>
+
+  <xs:simpleType name="Montant">
+    <xs:restriction base="xs:decimal">
+      <xs:minInclusive value="0"/>
+      <xs:fractionDigits value="2"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="Texte30">
+    <xs:restriction base="xs:string"><xs:minLength value="1"/><xs:maxLength value="30"/></xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="Texte40">
+    <xs:restriction base="xs:string"><xs:minLength value="1"/><xs:maxLength value="40"/></xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="Texte120">
+    <xs:restriction base="xs:string"><xs:minLength value="1"/><xs:maxLength value="120"/></xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="Texte200">
+    <xs:restriction base="xs:string"><xs:minLength value="1"/><xs:maxLength value="200"/></xs:restriction>
+  </xs:simpleType>
+  <xs:simpleType name="Texte1000">
+    <xs:restriction base="xs:string"><xs:minLength value="1"/><xs:maxLength value="1000"/></xs:restriction>
+  </xs:simpleType>
+</xs:schema>

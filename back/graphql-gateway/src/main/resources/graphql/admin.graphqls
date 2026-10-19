@@ -1,0 +1,233 @@
+# Administration (FleetPilot staff): client companies with their sites and cost centers, user accounts (Keycloak), rules
+# of the quote analysis, catalogue of electric models and low emission zones, activity journal.
+
+extend type Query {
+  "Client companies with the size of what they hold."
+  adminCompanies: [AdminCompany!]!
+  adminCompany(id: ID!): AdminCompany
+  "Activity journal, newest first: who did what."
+  auditTrail(filter: AuditFilter, page: Int = 0, size: Int = 30): AuditPage!
+  "User accounts of the client managers, drivers, garages and lessors; the staff accounts come from LDAP."
+  users(filter: UserFilter, page: Int = 0, size: Int = 20): UserPage!
+  user(id: ID!): User
+  "Leasing companies a lessor account can be attached to."
+  lessors: [String!]!
+  "Thresholds of the quote analysis and approval limits."
+  analysisRules: AnalysisRules!
+  "Low emission zones, city by city."
+  lowEmissionZones: [LowEmissionZone!]!
+}
+
+extend type Mutation {
+  createCompany(input: CompanyInput!): Company!
+  updateCompany(id: ID!, input: CompanyInput!): Company!
+  "Deactivating a company disables the accounts of its users."
+  setCompanyActive(id: ID!, active: Boolean!): Company!
+  createSite(companyId: ID!, input: SiteInput!): Site!
+  updateSite(id: ID!, input: SiteInput!): Site!
+  deleteSite(id: ID!): Boolean!
+  createCostCenter(companyId: ID!, input: CostCenterInput!): CostCenter!
+  updateCostCenter(id: ID!, input: CostCenterInput!): CostCenter!
+  deleteCostCenter(id: ID!): Boolean!
+
+  "Administrators: create an account; the temporary password is returned once."
+  createUser(input: UserInput!): CreatedUser!
+  updateUser(id: ID!, input: UserInput!): User!
+  "Administrators: a new temporary password, to change at the next sign-in."
+  resetUserPassword(id: ID!): String!
+
+  "Administrators: change the rules of the quote analysis."
+  updateAnalysisRules(input: AnalysisRulesInput!): AnalysisRules!
+
+  "Administrators: add or update an electric model; returns the number of vehicles assessed again."
+  saveEvModel(code: String!, input: EvModelInput!): Int!
+  deleteEvModel(code: String!): Int!
+  saveLowEmissionZone(city: String!, input: LowEmissionZoneInput!): Int!
+  deleteLowEmissionZone(city: String!): Int!
+}
+
+type AdminCompany {
+  company: Company!
+  vehicles: Int!
+  activeVehicles: Int!
+  drivers: Int!
+  sites: Int!
+  costCenters: Int!
+  activeContracts: Int!
+  "Sites with what is based there."
+  siteUsage: [SiteUsage!]!
+  "Cost centers with the vehicles charged to them."
+  costCenterUsage: [CostCenterUsage!]!
+}
+
+type SiteUsage { site: Site! vehicles: Int! drivers: Int! version: Int! }
+type CostCenterUsage { costCenter: CostCenter! vehicles: Int! version: Int! }
+
+input CompanyInput {
+  name: String!
+  legalName: String!
+  siren: String!
+  segment: CompanySegment!
+  address: String
+  postalCode: String
+  city: String!
+  contactName: String
+  contactEmail: String
+  contactPhone: String
+  version: Int
+}
+
+input SiteInput {
+  name: String!
+  address: String!
+  postalCode: String!
+  city: String!
+  latitude: Float!
+  longitude: Float!
+  version: Int
+}
+
+input CostCenterInput {
+  code: String!
+  label: String!
+  version: Int
+}
+
+input AuditFilter {
+  companyId: ID
+  "VEHICLE, DRIVER, CONTRACT, DEADLINE, INCIDENT, COMPANY, SITE, COST_CENTER, USER"
+  targetType: String
+  actor: String
+  since: DateTime
+}
+
+type AuditEntry {
+  id: ID!
+  occurredAt: DateTime!
+  actor: String!
+  actorRole: String
+  companyId: ID
+  action: String!
+  targetType: String!
+  targetId: String
+  targetLabel: String
+  details: String
+}
+
+type AuditPage {
+  content: [AuditEntry!]!
+  page: Int!
+  size: Int!
+  totalElements: Int!
+  totalPages: Int!
+}
+
+input UserFilter {
+  q: String
+  role: String
+  companyId: ID
+  enabled: Boolean
+}
+
+type User {
+  id: ID!
+  username: String!
+  email: String
+  firstName: String
+  lastName: String
+  fullName: String!
+  enabled: Boolean!
+  "platform-admin, fleet-manager, client-manager, driver, garage, api-supplier"
+  role: String
+  companyId: ID
+  companyName: String
+  driverId: ID
+  driverName: String
+  garageId: ID
+  garage: GarageRef
+  lessor: String
+  "Account of the corporate directory (LDAP), managed there."
+  federated: Boolean!
+  createdAt: DateTime
+}
+
+type UserPage {
+  content: [User!]!
+  page: Int!
+  size: Int!
+  totalElements: Int!
+  totalPages: Int!
+}
+
+type CreatedUser {
+  user: User!
+  temporaryPassword: String!
+}
+
+input UserInput {
+  email: String!
+  firstName: String!
+  lastName: String!
+  role: String!
+  companyId: ID
+  driverId: ID
+  garageId: ID
+  lessor: String
+  enabled: Boolean!
+}
+
+type AnalysisRules {
+  partTolerance: Float!
+  timeTolerance: Float!
+  rateTolerance: Float!
+  suppliesShare: Float!
+  suppliesMinimum: Float!
+  negotiationShare: Float!
+  negotiationMinimum: Float!
+  autoApprovalLimit: Float!
+  managerApprovalLimit: Float!
+  updatedAt: DateTime!
+  updatedBy: String!
+  version: Int!
+}
+
+input AnalysisRulesInput {
+  partTolerance: Float!
+  timeTolerance: Float!
+  rateTolerance: Float!
+  suppliesShare: Float!
+  suppliesMinimum: Float!
+  negotiationShare: Float!
+  negotiationMinimum: Float!
+  autoApprovalLimit: Float!
+  managerApprovalLimit: Float!
+  version: Int!
+}
+
+input EvModelInput {
+  make: String!
+  model: String!
+  category: String!
+  segment: String!
+  batteryKwh: Float!
+  wltpRangeKm: Int!
+  consumptionKwh100km: Float!
+  fastChargeKw: Int!
+  monthlyRent: Float!
+}
+
+type LowEmissionZone {
+  city: String!
+  zone: String!
+  maxCritAir: Int!
+  effectiveFrom: Date!
+  "IN_FORCE or ANNOUNCED"
+  status: String!
+}
+
+input LowEmissionZoneInput {
+  zone: String!
+  maxCritAir: Int!
+  effectiveFrom: Date!
+  status: String!
+}

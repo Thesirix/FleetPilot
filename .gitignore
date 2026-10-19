@@ -1,0 +1,33 @@
+# Build output
+target/
+build/
+dist/
+.output/
+.nuxt/
+node_modules/
+
+# IDE and OS files
+.idea/
+*.iml
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Android
+mobile/android/.gradle/
+mobile/android/local.properties
+mobile/android/app/build/
+
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+*.log
+
+# Test outputs
+front/playwright-report/
+front/test-results/
+front/cypress/screenshots/
+front/cypress/videos/
+front/cypress/downloads/
+__pycache__/

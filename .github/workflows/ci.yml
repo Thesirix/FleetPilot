@@ -1,0 +1,178 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  backend:
+    name: Back-end (build, tests, quality)
+    runs-on: ubuntu-latest
+    env:
+      # Optional: the analysis runs only when the repository defines these (Settings > Secrets and variables)
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+      SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL }}
+    defaults:
+      run:
+        working-directory: back
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0 # full history for SonarQube "new code" detection
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "25"
+          cache: maven
+
+      # Unit tests, integration tests (Testcontainers: PostgreSQL, Kafka), Cucumber scenarios, Checkstyle, JaCoCo
+      - name: Build and test
+        run: sh mvnw -B -ntp verify
+
+      - name: SonarQube analysis
+        if: ${{ env.SONAR_TOKEN != '' && env.SONAR_HOST_URL != '' }}
+        run: sh mvnw -B -ntp sonar:sonar -Dsonar.host.url="$SONAR_HOST_URL" -Dsonar.token="$SONAR_TOKEN" -Dsonar.qualitygate.wait=true
+
+      - name: Test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-test-reports
+          path: |
+            back/**/target/surefire-reports/
+            back/**/target/failsafe-reports/
+            back/**/target/site/jacoco/
+            back/**/target/cucumber/
+          retention-days: 14
+
+  frontend:
+    name: Portal (types, unit tests, build)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: front
+    env:
+      CYPRESS_INSTALL_BINARY: "0"
+      PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: "1"
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "24"
+          cache: npm
+          cache-dependency-path: front/package-lock.json
+      - run: npm ci
+      - name: Type check
+        run: npx nuxt typecheck
+      - name: Unit tests (Vitest)
+        run: npm test
+      - name: Static build
+        run: npx nuxt generate
+
+
+  android:
+    name: Driver app (Android, unit tests, build)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: mobile/android
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "21"
+      - uses: gradle/actions/setup-gradle@v5
+      # The SDK of the runner is completed by the Android Gradle Plugin (platform 37, build tools)
+      - name: Unit tests and debug build
+        run: sh gradlew --no-daemon testDebugUnitTest assembleDebug
+      - name: Test reports and APK
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: android
+          path: |
+            mobile/android/app/build/test-results/
+            mobile/android/app/build/outputs/apk/debug/
+          retention-days: 14
+  images:
+    name: Docker images
+    needs: [backend, frontend]
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        service: [vehicle-service, quote-service, notification-service, reporting-service, telemetry-service, vehicle-simulator, integration-esb, bigdata-pipeline, energy-service, graphql-gateway]
+    steps:
+      - uses: actions/checkout@v5
+      - name: Build ${{ matrix.service }}
+        run: docker build -f back/Dockerfile --build-arg SERVICE=${{ matrix.service }} -t fleetpilot/${{ matrix.service }}:${{ github.sha }} back
+
+  extranet-images:
+    name: Lessor extranet images (Tomcat, Apache)
+    needs: [backend]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Tomcat 11 with the WAR
+        run: docker build -f infra/tomcat/Dockerfile --build-context tomcat=infra/tomcat -t fleetpilot/tomcat-extranet:${{ github.sha }} back
+      - name: Apache httpd
+        run: docker build -t fleetpilot/apache-extranet:${{ github.sha }} infra/apache
+
+  compose:
+    name: Docker Compose smoke test
+    needs: images
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Start the platform
+        run: docker compose up -d --build --wait --wait-timeout 300
+      - name: Check the API and the single sign-on
+        run: |
+          curl -fsS http://localhost:8081/actuator/health/readiness
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:8081/api/v1/vehicles)" = "401"
+          TOKEN_URL=http://localhost:8180/realms/fleetpilot/protocol/openid-connect/token
+          TOKEN=$(curl -fsS -d grant_type=client_credentials -d client_id=fleetpilot-services -d client_secret=dev-fleetpilot-services-secret "$TOKEN_URL" | jq -r .access_token)
+          curl -fsS -H "Authorization: Bearer $TOKEN" "http://localhost:8081/api/v1/vehicles?size=1" | grep -q '"totalElements":1500'
+          python3 tools/scripts/oidc_login.py claire.morel > /dev/null
+          # The quote service copied the fleet from the vehicle service with its own client_credentials token
+          curl -fsS -H "Authorization: Bearer $TOKEN" "http://localhost/api/v1/quotes?size=1" | grep -q '"totalElements"'
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "24"
+      - name: End-to-end tests of the portal (Cypress, real Keycloak)
+        working-directory: front
+        run: npm ci && npx cypress run
+      - name: Lessor extranet behind Apache and Tomcat
+        run: |
+          test "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:8095/extranet/)" = "302"
+          curl -fsS -I http://localhost:8095/extranet/static/extranet.css | grep -qi "content-security-policy"
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "25"
+          cache: maven
+      - name: Business scenarios in French (Cucumber, Selenium WebDriver, headless Chrome)
+        working-directory: back
+        run: sh mvnw -B -ntp install -DskipTests && sh mvnw -B -ntp -pl acceptance-tests verify -De2e
+      - name: Cucumber report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cucumber-report
+          path: back/acceptance-tests/target/cucumber/
+          retention-days: 14
+      - name: Logs on failure
+        if: failure()
+        run: docker compose logs --tail=200
+      - name: Stop
+        if: always()
+        run: docker compose down -v

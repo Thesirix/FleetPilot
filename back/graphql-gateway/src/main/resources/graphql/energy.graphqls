@@ -1,0 +1,128 @@
+# Energy transition (energy-service): which vehicles can go electric, with which model, at what cost and for how much
+# CO2, from the real usage of the last 90 days; the greening plan and the quotas of the loi LOM.
+
+enum Eligibility { ZERO_EMISSION ELIGIBLE ELIGIBLE_WITH_CHARGING NOT_YET TO_CONFIRM NOT_APPLICABLE }
+
+extend type Query {
+  "The fleet (or one company) at a glance."
+  energySummary(companyId: ID): EnergySummary!
+  "The assessment of each vehicle; sort: annualSaving (default), renewalDate, annualKm, registration."
+  energyAssessments(filter: EnergyFilter, sort: String, page: Int = 0, size: Int = 25): EnergyAssessmentPage!
+  energyAssessment(vehicleId: ID!): EnergyAssessment
+  "Quarter by quarter until the end of 2028, and the quotas of the renewals."
+  energyPlan(companyId: ID): EnergyPlan!
+  "The electric models proposed."
+  evCatalog: [EvModel!]!
+}
+
+extend type Mutation {
+  "Staff: assess the fleet again now (done every night otherwise)."
+  refreshEnergyAssessments: Int!
+}
+
+input EnergyFilter {
+  companyId: ID
+  status: Eligibility
+  category: VehicleCategory
+  "Registration, model or city of the site."
+  q: String
+}
+
+type EvModel {
+  code: String!
+  name: String!
+  category: String!
+  segment: String!
+  batteryKwh: Float!
+  wltpRangeKm: Int!
+  "70 % of WLTP: winter, motorway, load."
+  realisticRangeKm: Int!
+  consumptionKwh100km: Float!
+  fastChargeKw: Int!
+  monthlyRent: Float!
+  make: String
+  model: String
+}
+
+type EnergyAssessment {
+  vehicleId: ID!
+  companyId: ID!
+  companyName: String
+  registration: String!
+  make: String
+  model: String
+  category: String!
+  energy: String!
+  critAir: Int
+  co2GramsPerKm: Int
+  siteCity: String
+  status: Eligibility!
+  "TELEMETRY (measured) or REGISTER (estimated from the odometer)."
+  dataSource: String!
+  reason: String
+  annualKm: Int!
+  activeDays: Int
+  p95DailyKm: Float
+  longestDayKm: Float
+  daysBeyondRange: Int
+  requiredRangeKm: Int
+  evModel: EvModel
+  currentAnnualCost: Float
+  evAnnualCost: Float
+  annualSaving: Float
+  co2CurrentKg: Int
+  co2EvKg: Int
+  renewalDate: Date
+  zfeZone: String
+  zfeBannedFrom: Date
+  computedAt: DateTime!
+}
+
+type EnergyAssessmentPage {
+  content: [EnergyAssessment!]!
+  page: Int!
+  size: Int!
+  totalElements: Int!
+  totalPages: Int!
+}
+
+type EnergySummary {
+  vehicles: Int!
+  zeroEmission: Int!
+  eligible: Int!
+  eligibleWithCharging: Int!
+  notYet: Int!
+  toConfirm: Int!
+  notApplicable: Int!
+  zeroEmissionShare: Float!
+  potentialShare: Float!
+  annualSavingPotential: Float!
+  co2CurrentTonnes: Float!
+  co2AvoidableTonnes: Float!
+  zfeExposed: Int!
+  zfeBannedNow: Int!
+  computedAt: DateTime
+}
+
+type PlanQuarter {
+  quarter: String!
+  start: Date!
+  vehicles: Int!
+  annualSaving: Float!
+  co2AvoidedTonnes: Float!
+  zeroEmissionShareAfter: Float!
+}
+
+type QuotaYear {
+  year: Int!
+  renewals: Int!
+  lowEmissionRenewals: Int!
+  share: Float!
+  objective: Int!
+  met: Boolean!
+}
+
+type EnergyPlan {
+  quarters: [PlanQuarter!]!
+  quotas: [QuotaYear!]!
+}

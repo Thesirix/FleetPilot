@@ -1,0 +1,25 @@
+{
+  "index_patterns": ["fleetpilot-logs-*"],
+  "priority": 200,
+  "template": {
+    "settings": { "number_of_shards": 1, "number_of_replicas": 0 },
+    "mappings": {
+      "dynamic_templates": [
+        { "strings_as_keywords": { "match_mapping_type": "string", "mapping": { "type": "keyword", "ignore_above": 512 } } }
+      ],
+      "properties": {
+        "@timestamp": { "type": "date" },
+        "message": { "type": "text" },
+        "log": { "properties": { "level": { "type": "keyword" }, "logger": { "type": "keyword" } } },
+        "service": { "properties": { "name": { "type": "keyword" } } },
+        "trace": { "properties": { "correlation_id": { "type": "keyword" } } },
+        "event": { "properties": { "dataset": { "type": "keyword" }, "duration_seconds": { "type": "float" } } },
+        "http": { "properties": { "request": { "properties": { "method": { "type": "keyword" } } },
+                                  "response": { "properties": { "status_code": { "type": "integer" } } } } },
+        "url": { "properties": { "path": { "type": "keyword" }, "route": { "type": "keyword" } } },
+        "error": { "properties": { "stack_trace": { "type": "text" }, "type": { "type": "keyword" } } }
+      }
+    }
+  },
+  "_meta": { "description": "FleetPilot: logs of every container, parsed by Logstash" }
+}

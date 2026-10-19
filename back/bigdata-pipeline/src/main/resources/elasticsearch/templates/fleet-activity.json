@@ -1,0 +1,44 @@
+{
+  "index_patterns": [
+    "fleet-activity"
+  ],
+  "priority": 200,
+  "template": {
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 0
+    },
+    "mappings": {
+      "dynamic": "false",
+      "properties": {
+        "companyId": {
+          "type": "keyword"
+        },
+        "companyName": {
+          "type": "keyword"
+        },
+        "windowStart": {
+          "type": "date"
+        },
+        "windowEnd": {
+          "type": "date"
+        },
+        "connectedVehicles": {
+          "type": "integer"
+        },
+        "movingVehicles": {
+          "type": "integer"
+        },
+        "idlingVehicles": {
+          "type": "integer"
+        },
+        "averageSpeed": {
+          "type": "integer"
+        }
+      }
+    }
+  },
+  "_meta": {
+    "description": "FleetPilot analytics: fleet-activity"
+  }
+}

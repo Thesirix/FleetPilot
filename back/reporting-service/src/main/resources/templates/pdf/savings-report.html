@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <title th:text="${title}">Rapport d'économies</title>
+  <style th:utext="${documentStyles}"></style>
+</head>
+<body>
+<div class="header">
+  <div>
+    <div class="brand">FleetPilot</div>
+    <div class="brand-sub" th:text="${scope}">Entreprise</div>
+  </div>
+  <div class="doc-title">
+    <h1>Rapport d'économies</h1>
+    <p>Devis garages comparés au tarif de référence</p>
+    <p class="muted" th:text="|Édité le ${fmt.date(today)}|">Date</p>
+  </div>
+</div>
+
+<div class="kpis">
+  <div class="kpi">
+    <div class="label">Économies obtenues</div>
+    <div class="value success" th:text="${fmt.roundMoney(s.savings)}">0</div>
+    <div class="label" th:text="|${fmt.percent(s.savingsRate)} des montants demandés|">0 %</div>
+  </div>
+  <div class="kpi">
+    <div class="label">Montants demandés</div>
+    <div class="value" th:text="${fmt.roundMoney(s.amountQuoted)}">0</div>
+    <div class="label" th:text="|${fmt.number(s.quotes)} devis reçus|">0</div>
+  </div>
+  <div class="kpi">
+    <div class="label">Reste à négocier</div>
+    <div class="value danger" th:text="${fmt.roundMoney(s.pendingOvercharge)}">0</div>
+    <div class="label" th:text="|${fmt.number(s.openQuotes)} devis en attente|">0</div>
+  </div>
+  <div class="kpi">
+    <div class="label">Validation automatique</div>
+    <div class="value" th:text="${fmt.percent(s.autoApprovalRate)}">0 %</div>
+    <div class="label">des devis acceptés</div>
+  </div>
+</div>
+
+<h2>Économies des douze derniers mois</h2>
+<table class="grid">
+  <tr><th>Mois</th><th class="right">Devis</th><th class="right">Demandé</th><th class="right">Accepté</th>
+    <th class="right">Économie</th><th style="width: 30%"></th></tr>
+  <tr th:each="m : ${s.months}">
+    <td th:text="${fmt.month(m.month)}">octobre 2026</td>
+    <td class="right" th:text="${fmt.number(m.quotes)}">0</td>
+    <td class="right" th:text="${fmt.roundMoney(m.quoted)}">0</td>
+    <td class="right" th:text="${fmt.roundMoney(m.accepted)}">0</td>
+    <td class="right success" th:text="${fmt.roundMoney(m.savings)}">0</td>
+    <td><div class="bar" th:style="|width: ${maxSavings > 0 ? (m.savings * 100 / maxSavings) : 0}%|"></div></td>
+  </tr>
+</table>
+
+<h2>Anomalies détectées</h2>
+<table class="grid">
+  <tr><th>Anomalie</th><th class="right">Lignes</th><th class="right">Surcoût</th></tr>
+  <tr th:each="f : ${s.findings}">
+    <td th:text="${f.finding == 'OVERPRICED_PART' ? 'Pièce trop chère' : f.finding == 'EXCESSIVE_TIME' ? 'Temps hors barème'
+        : f.finding == 'OVERPRICED_RATE' ? 'Taux horaire trop élevé' : f.finding == 'DUPLICATE' ? 'Doublon'
+        : f.finding == 'EXCESSIVE_SUPPLIES' ? 'Ingrédients excessifs' : 'Hors tarif (vérifié manuellement)'}">x</td>
+    <td class="right" th:text="${fmt.number(f.lines)}">0</td>
+    <td class="right" th:text="${fmt.roundMoney(f.overcharge)}">0</td>
+  </tr>
+</table>
+
+<h2>Garages à surveiller</h2>
+<table class="grid">
+  <tr><th>Garage</th><th>Ville</th><th class="right">Devis</th><th class="right">Taux de surcoût</th>
+    <th class="right">Économies</th></tr>
+  <tr th:each="g : ${s.garagesToWatch}">
+    <td th:text="${g.name}">Garage</td>
+    <td th:text="${g.city}">Ville</td>
+    <td class="right" th:text="${fmt.number(g.quotes)}">0</td>
+    <td class="right danger" th:text="${fmt.percent(g.overchargeRate)}">0 %</td>
+    <td class="right" th:text="${fmt.roundMoney(g.savings)}">0</td>
+  </tr>
+</table>
+
+<div class="note">
+  Chaque ligne de devis est comparée au tarif de référence négocié : prix des pièces par catégorie de véhicule, temps
+  barème des opérations et taux horaires de chaque région. L'économie d'un devis est la différence entre le montant
+  demandé par le garage et le montant accepté après analyse et négociation.
+</div>
+</body>
+</html>

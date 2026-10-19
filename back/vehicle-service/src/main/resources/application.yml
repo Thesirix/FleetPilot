@@ -1,0 +1,113 @@
+server:
+  port: 8081
+  shutdown: graceful
+  forward-headers-strategy: framework
+
+spring:
+  application:
+    name: vehicle-service
+  threads:
+    virtual:
+      enabled: true
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/fleet_vehicle}
+    username: ${DB_USER:fleetpilot}
+    password: ${DB_PASSWORD:fleetpilot}
+    hikari:
+      maximum-pool-size: 10
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc:
+          batch_size: 50
+          time_zone: UTC
+        order_inserts: true
+        order_updates: true
+  flyway:
+    locations: classpath:db/migration
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          # Tokens are issued for the public URL of Keycloak, but the keys are fetched on the internal network.
+          issuer-uri: ${OIDC_ISSUER_URI:http://localhost:8180/realms/fleetpilot}
+          jwk-set-uri: ${OIDC_JWK_SET_URI:http://localhost:8180/realms/fleetpilot/protocol/openid-connect/certs}
+          audiences: fleetpilot-api
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    producer:
+      acks: all
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      properties:
+        enable.idempotence: true
+        delivery.timeout.ms: 15000
+        request.timeout.ms: 10000
+        max.block.ms: 5000
+    consumer:
+      auto-offset-reset: latest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+  data:
+    web:
+      pageable:
+        max-page-size: 100
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 5MB
+
+fleetpilot:
+  oidc:
+    # Public URL of the realm, used by Swagger UI in the browser to log in
+    public-issuer-uri: ${OIDC_PUBLIC_ISSUER_URI:http://localhost:8180/realms/fleetpilot}
+  outbox:
+    relay:
+      enabled: true
+      interval: 1000
+  sweep:
+    enabled: true
+    cron: "0 0 6 * * *"
+  demo-data:
+    enabled: ${DEMO_DATA:false}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: always
+  info:
+    env:
+      enabled: true
+
+info:
+  app:
+    name: FleetPilot vehicle-service
+    description: Fleet register, assignments, lease contracts, deadlines, claims
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    persist-authorization: true
+    oauth:
+      client-id: fleetpilot-swagger
+      use-pkce-with-authorization-code-grant: true
+      scopes: openid
+    operations-sorter: alpha
+    tags-sorter: alpha
+
+# In Docker, LOGGING_STRUCTURED_FORMAT_CONSOLE=ecs switches to JSON logs (Elastic Common Schema) for ELK.
+logging:
+  level:
+    com.fleetpilot: INFO
+    org.apache.kafka: WARN

@@ -1,0 +1,398 @@
+/*
+ * FleetPilot login: sober, neutral background, white card, teal accent.
+ * Same design tokens as the web portal (front/assets/css/tokens.css).
+ */
+:root {
+  --fp-bg: #f5f6f8;
+  --fp-surface: #ffffff;
+  --fp-border: #e3e6eb;
+  --fp-text: #101828;
+  --fp-muted: #5d6779;
+  --fp-primary: #0f766e;
+  --fp-primary-hover: #115e59;
+  --fp-ring: rgba(15, 118, 110, 0.22);
+  --fp-radius: 8px;
+  --keycloak-card-top-color: var(--fp-primary);
+  --fp-font: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+
+  --pf-v5-global--FontFamily--text: var(--fp-font);
+  --pf-v5-global--FontFamily--heading: var(--fp-font);
+  --pf-v5-global--primary-color--100: var(--fp-primary);
+  --pf-v5-global--primary-color--200: var(--fp-primary-hover);
+  --pf-v5-global--link--Color: var(--fp-primary);
+  --pf-v5-global--link--Color--hover: var(--fp-primary-hover);
+  --pf-v5-global--BorderRadius--sm: 6px;
+  --pf-v5-global--Color--100: var(--fp-text);
+  --pf-v5-global--Color--200: var(--fp-muted);
+}
+
+html,
+body {
+  background: var(--fp-bg) !important;
+  color: var(--fp-text);
+  font-family: var(--fp-font);
+  -webkit-font-smoothing: antialiased;
+}
+
+.pf-v5-c-login {
+  background: var(--fp-bg) !important;
+  min-height: 100vh;
+}
+
+.pf-v5-c-login::before {
+  content: none !important;
+}
+
+.pf-v5-c-login__container {
+  max-width: 440px;
+  padding-top: 8vh;
+}
+
+/* Brand: the realm display name, set in a wordmark style */
+.pf-v5-c-login__header,
+#kc-header {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+#kc-header,
+#kc-header-wrapper,
+#kc-header-wrapper * {
+  color: var(--fp-text) !important;
+}
+
+#kc-header-wrapper {
+  font-size: 22px;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  color: var(--fp-text);
+  text-transform: none;
+}
+
+/* The same mark as the portal (front/public/logo.svg) */
+#kc-header-wrapper::before {
+  content: "";
+  display: inline-block;
+  width: 28px;
+  height: 28px;
+  margin-right: 10px;
+  vertical-align: -6px;
+  background: url("../img/logo.svg") center / contain no-repeat;
+}
+
+.pf-v5-c-login__main {
+  background: var(--fp-surface);
+  border: 1px solid var(--fp-border) !important;
+  border-radius: 12px;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04), 0 8px 24px rgba(16, 24, 40, 0.06);
+}
+
+.pf-v5-c-login__main-header {
+  padding-bottom: 4px;
+}
+
+.pf-v5-c-title,
+#kc-page-title {
+  font-size: 18px !important;
+  font-weight: 600 !important;
+  letter-spacing: -0.01em;
+  color: var(--fp-text);
+}
+
+.pf-v5-c-form__label-text {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--fp-text);
+}
+
+/* Inputs: one plain border instead of PatternFly's underline, and a soft focus ring */
+.pf-v5-c-form-control {
+  border: 1px solid var(--fp-border);
+  border-radius: var(--fp-radius);
+  background: var(--fp-surface);
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.pf-v5-c-form-control::before,
+.pf-v5-c-form-control::after {
+  border: none !important;
+}
+
+.pf-v5-c-form-control > input,
+.pf-v5-c-form-control > select {
+  outline: none !important;
+  padding-block: 9px;
+}
+
+.pf-v5-c-form-control:focus-within {
+  border-color: var(--fp-primary);
+  box-shadow: 0 0 0 3px var(--fp-ring);
+}
+
+.pf-v5-c-input-group .pf-v5-c-button.pf-m-control {
+  border: 1px solid var(--fp-border);
+  border-left: none;
+  border-radius: 0 var(--fp-radius) var(--fp-radius) 0;
+}
+
+.pf-v5-c-input-group .pf-v5-c-button.pf-m-control::after {
+  border: none;
+}
+
+.pf-v5-c-input-group > .pf-v5-c-form-control {
+  border-radius: var(--fp-radius) 0 0 var(--fp-radius);
+}
+
+.pf-v5-c-button.pf-m-primary {
+  background: var(--fp-primary);
+  border-radius: var(--fp-radius);
+  font-weight: 600;
+  padding-block: 10px;
+}
+
+.pf-v5-c-button.pf-m-primary:hover,
+.pf-v5-c-button.pf-m-primary:focus {
+  background: var(--fp-primary-hover);
+}
+
+.pf-v5-c-alert {
+  border-radius: var(--fp-radius);
+}
+
+.pf-v5-c-login__main-footer-band {
+  background: transparent;
+  border-top: 1px solid var(--fp-border);
+  color: var(--fp-muted);
+}
+
+.pf-v5-c-login__footer {
+  color: var(--fp-muted);
+}
+
+/* Split screen: the brand panel on the left (from 992px), the form on the right */
+.fp-split {
+  display: flex;
+  min-height: 100vh;
+}
+
+.fp-split > .pf-v5-c-login {
+  flex: 1;
+  min-width: 0;
+}
+
+.fp-art {
+  display: none;
+}
+
+@media (min-width: 992px) {
+  .fp-art {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    width: 46%;
+    max-width: 680px;
+    padding: 44px 48px;
+    overflow: hidden;
+    background: linear-gradient(155deg, #0f766e 0%, #115e59 48%, #0b3b37 100%);
+    color: #ffffff;
+    isolation: isolate;
+  }
+
+  /* Two soft lights drifting slowly over the gradient */
+  .fp-art::before {
+    content: "";
+    position: absolute;
+    inset: -25%;
+    z-index: -1;
+    background:
+      radial-gradient(420px 300px at 22% 18%, rgba(255, 255, 255, 0.16), transparent 70%),
+      radial-gradient(520px 380px at 85% 88%, rgba(94, 234, 212, 0.32), transparent 70%);
+    animation: fp-drift 18s ease-in-out infinite alternate;
+  }
+
+  /* The brand sits in the panel: no second logo above the form */
+  #kc-header {
+    display: none;
+  }
+
+  .fp-split .pf-v5-c-login__container {
+    padding-top: 14vh;
+  }
+}
+
+.fp-map {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  width: 100%;
+  height: 100%;
+}
+
+.fp-streets path {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.09);
+  stroke-width: 14;
+  stroke-linecap: round;
+}
+
+.fp-trip {
+  fill: none;
+  stroke: rgba(255, 255, 255, 0.7);
+  stroke-width: 2.5;
+  stroke-dasharray: 2 9;
+  stroke-linecap: round;
+  animation: fp-dash 1.6s linear infinite;
+}
+
+.fp-stop {
+  fill: #ffffff;
+}
+
+.fp-pulse {
+  fill: none;
+  stroke: #ffffff;
+  stroke-width: 2;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: fp-pulse 2.6s ease-out infinite;
+}
+
+.fp-pulse-late {
+  animation-delay: 1.3s;
+}
+
+.fp-vehicle circle {
+  fill: #5eead4;
+}
+
+.fp-vehicle .fp-vehicle-halo {
+  fill: rgba(94, 234, 212, 0.28);
+}
+
+.fp-art-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 22px;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+  animation: fp-rise 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.fp-art-brand img {
+  border-radius: 9px;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.35);
+}
+
+.fp-pitch {
+  max-width: 440px;
+  animation: fp-rise 0.7s 0.12s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.fp-pitch h2 {
+  margin: 0 0 12px;
+  font-size: 34px;
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+  color: #ffffff;
+}
+
+.fp-pitch p {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.82);
+}
+
+.fp-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  animation: fp-rise 0.7s 0.24s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.fp-chips li {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 12px;
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  backdrop-filter: blur(6px);
+  font-size: 13px;
+  color: #ffffff;
+}
+
+.fp-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #5eead4;
+  box-shadow: 0 0 0 3px rgba(94, 234, 212, 0.25);
+}
+
+/* The card comes up gently; a refused password shakes the field */
+.pf-v5-c-login__main {
+  animation: fp-rise 0.6s 0.1s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.pf-v5-c-form-control:has(input[aria-invalid="true"]) {
+  border-color: #b42318;
+  animation: fp-shake 0.4s;
+}
+
+.pf-v5-c-button.pf-m-primary {
+  transition: background-color 0.15s, transform 0.15s, box-shadow 0.15s;
+}
+
+.pf-v5-c-button.pf-m-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(15, 118, 110, 0.28);
+}
+
+@keyframes fp-drift {
+  from { transform: translate3d(-4%, -2%, 0) rotate(0deg); }
+  to { transform: translate3d(4%, 3%, 0) rotate(6deg); }
+}
+
+@keyframes fp-dash {
+  to { stroke-dashoffset: -22; }
+}
+
+@keyframes fp-pulse {
+  from { opacity: 0.9; transform: scale(0.8); }
+  to { opacity: 0; transform: scale(3); }
+}
+
+@keyframes fp-rise {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: none; }
+}
+
+@keyframes fp-shake {
+  20%, 60% { transform: translateX(-6px); }
+  40%, 80% { transform: translateX(6px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fp-art::before,
+  .fp-trip,
+  .fp-pulse,
+  .fp-art-brand,
+  .fp-pitch,
+  .fp-chips,
+  .pf-v5-c-login__main,
+  .pf-v5-c-form-control:has(input[aria-invalid="true"]) {
+    animation: none;
+  }
+
+  .fp-vehicle {
+    display: none;
+  }
+}

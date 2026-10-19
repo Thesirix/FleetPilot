@@ -1,0 +1,94 @@
+server:
+  port: 8085
+  shutdown: graceful
+  forward-headers-strategy: framework
+
+spring:
+  application:
+    name: reporting-service
+  threads:
+    virtual:
+      enabled: true
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/fleet_reporting}
+    username: ${DB_USER:fleetpilot}
+    password: ${DB_PASSWORD:fleetpilot}
+    hikari:
+      maximum-pool-size: 10
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+  flyway:
+    locations: classpath:db/migration
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${OIDC_ISSUER_URI:http://localhost:8180/realms/fleetpilot}
+          jwk-set-uri: ${OIDC_JWK_SET_URI:http://localhost:8180/realms/fleetpilot/protocol/openid-connect/certs}
+          audiences: fleetpilot-api
+      client:
+        registration:
+          fleetpilot-services:
+            provider: keycloak
+            client-id: fleetpilot-services
+            client-secret: ${SERVICES_CLIENT_SECRET:dev-fleetpilot-services-secret}
+            authorization-grant-type: client_credentials
+            scope: openid
+        provider:
+          keycloak:
+            token-uri: ${OIDC_TOKEN_URI:http://localhost:8180/realms/fleetpilot/protocol/openid-connect/token}
+  activemq:
+    broker-url: ${ACTIVEMQ_URL:tcp://localhost:61616}
+    user: ${ACTIVEMQ_USER:admin}
+    password: ${ACTIVEMQ_PASSWORD:admin}
+  jms:
+    listener:
+      session:
+        transacted: true
+  thymeleaf:
+    check-template-location: false
+
+fleetpilot:
+  oidc:
+    public-issuer-uri: ${OIDC_PUBLIC_ISSUER_URI:http://localhost:8180/realms/fleetpilot}
+  services:
+    vehicle-url: ${VEHICLE_SERVICE_URL:http://localhost:8081}
+    quote-url: ${QUOTE_SERVICE_URL:http://localhost:8083}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: always
+
+info:
+  app:
+    name: FleetPilot reporting-service
+    description: Excel and PDF reports, fleet indicators
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    persist-authorization: true
+    oauth:
+      client-id: fleetpilot-swagger
+      use-pkce-with-authorization-code-grant: true
+      scopes: openid
+
+logging:
+  level:
+    com.fleetpilot: INFO
+    org.apache.poi: WARN

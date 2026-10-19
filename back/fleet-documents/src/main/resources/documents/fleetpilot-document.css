@@ -1,0 +1,177 @@
+/* FleetPilot documents (purchase orders, reports): same sober look as the portal, made for A4 paper. */
+@page {
+  size: A4;
+  margin: 18mm 16mm 20mm 16mm;
+  @bottom-left {
+    content: "FleetPilot · fleetpilot.dev";
+    font-family: Helvetica, sans-serif;
+    font-size: 7.5pt;
+    color: #98a2b3;
+  }
+  @bottom-right {
+    content: "Page " counter(page) " / " counter(pages);
+    font-family: Helvetica, sans-serif;
+    font-size: 7.5pt;
+    color: #98a2b3;
+  }
+}
+
+body {
+  font-family: Helvetica, Arial, sans-serif;
+  font-size: 9.5pt;
+  line-height: 1.45;
+  color: #101828;
+}
+
+.header {
+  display: table;
+  width: 100%;
+  margin-bottom: 10mm;
+  padding-bottom: 5mm;
+  border-bottom: 2px solid #0f766e;
+}
+
+.header > div {
+  display: table-cell;
+  vertical-align: top;
+}
+
+.brand {
+  font-size: 15pt;
+  font-weight: bold;
+  color: #0f766e;
+}
+
+.brand-sub {
+  font-size: 8pt;
+  color: #667085;
+}
+
+.doc-title {
+  text-align: right;
+}
+
+.doc-title h1 {
+  margin: 0;
+  font-size: 14pt;
+}
+
+.doc-title p {
+  margin: 2px 0 0;
+  color: #475467;
+}
+
+h2 {
+  margin: 7mm 0 3mm;
+  font-size: 10.5pt;
+  color: #101828;
+}
+
+.muted {
+  color: #667085;
+}
+
+.parties {
+  display: table;
+  width: 100%;
+  margin-bottom: 6mm;
+}
+
+.parties > div {
+  display: table-cell;
+  width: 50%;
+  padding: 3mm 4mm;
+  border: 1px solid #e3e6eb;
+  vertical-align: top;
+}
+
+.parties .label {
+  font-size: 7.5pt;
+  font-weight: bold;
+  color: #667085;
+  text-transform: uppercase;
+}
+
+table.grid {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 4mm;
+}
+
+table.grid th {
+  padding: 2mm 2.5mm;
+  background: #f5f6f8;
+  border-bottom: 1px solid #cfd4dc;
+  font-size: 7.5pt;
+  font-weight: bold;
+  color: #475467;
+  text-align: left;
+}
+
+table.grid td {
+  padding: 2mm 2.5mm;
+  border-bottom: 1px solid #e3e6eb;
+  vertical-align: top;
+}
+
+table.grid tr.total td {
+  border-top: 1.5px solid #101828;
+  border-bottom: none;
+  font-weight: bold;
+}
+
+.right,
+table.grid th.right {
+  text-align: right;
+}
+
+.mono {
+  font-family: Courier, monospace;
+}
+
+.kpis {
+  display: table;
+  width: 100%;
+  margin: 2mm 0 4mm;
+  border-spacing: 3mm 0;
+}
+
+.kpi {
+  display: table-cell;
+  padding: 3mm 4mm;
+  border: 1px solid #e3e6eb;
+  border-radius: 2mm;
+}
+
+.kpi .label {
+  font-size: 7.5pt;
+  color: #667085;
+}
+
+.kpi .value {
+  margin-top: 1mm;
+  font-size: 13pt;
+  font-weight: bold;
+}
+
+.success {
+  color: #067647;
+}
+
+.danger {
+  color: #b42318;
+}
+
+.note {
+  margin-top: 6mm;
+  padding: 3mm 4mm;
+  border-left: 2px solid #0f766e;
+  background: #f9fafb;
+  color: #475467;
+  font-size: 8.5pt;
+}
+
+.bar {
+  height: 2.2mm;
+  background: #0f766e;
+}

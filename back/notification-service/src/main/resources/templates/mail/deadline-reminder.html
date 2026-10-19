@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{mail/layout :: email(~{::title}, ~{::section})}" lang="fr">
+<head>
+  <title th:text="${level == 'OVERDUE'}
+      ? |Échéance dépassée : ${fmt.label(type)} du véhicule ${registration}|
+      : |Rappel : ${fmt.label(type)} du véhicule ${registration}|">Échéance</title>
+</head>
+<body>
+<section>
+  <p style="margin:0 0 14px;">Bonjour<span th:if="${recipientName}" th:text="| ${recipientName}|"></span>,</p>
+  <p th:if="${level == 'OVERDUE'}" style="margin:0 0 14px;color:#b42318;">
+    Le <strong th:text="${fmt.label(type)}">contrôle</strong> du véhicule <strong th:text="${registration}">AB</strong>
+    est dépassé. Le véhicule ne doit plus circuler s'il s'agit du contrôle technique : prenez rendez-vous sans attendre.
+  </p>
+  <p th:unless="${level == 'OVERDUE'}" style="margin:0 0 14px;">
+    Le <strong th:text="${fmt.label(type)}">contrôle</strong> du véhicule <strong th:text="${registration}">AB</strong>
+    arrive à échéance<span th:if="${level == 'D7'}"> dans moins d'une semaine</span><span th:if="${level == 'D30'}"> dans le mois</span>.
+    Prenez rendez-vous dans un garage agréé du réseau.
+  </p>
+  <table th:replace="~{mail/fragments :: facts(${ { {'Véhicule', registration}, {'Échéance', fmt.label(type)},
+      {'Date limite', dueDate != null ? fmt.date(dueDate) : '-'},
+      {'Kilométrage limite', dueMileage != null ? fmt.number(dueMileage) + ' km' : '-'},
+      {'Kilométrage actuel', fmt.number(currentMileage) + ' km'} } })}"></table>
+  <a th:replace="~{mail/fragments :: button(${portalUrl}, 'Ouvrir FleetPilot')}"></a>
+</section>
+</body>
+</html>

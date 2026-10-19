@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{mail/layout :: email(~{::title}, ~{::section})}" lang="fr">
+<head>
+  <title th:text="${injuries} ? |Sinistre avec blessés : ${reference} (${registration})|
+      : |Sinistre déclaré : ${reference} (${registration})|">Sinistre</title>
+</head>
+<body>
+<section>
+  <p style="margin:0 0 14px;">Bonjour,</p>
+  <p th:if="${injuries}" style="margin:0 0 14px;padding:10px 14px;border-radius:8px;background:#fef3f2;color:#b42318;">
+    <strong>Des blessés sont signalés.</strong> Prenez contact avec le conducteur et déclarez le sinistre à l'assureur
+    dans les plus brefs délais.
+  </p>
+  <p style="margin:0 0 14px;">
+    Un sinistre (<span th:text="${fmt.label(type)}">type</span>) vient d'être déclaré sur le véhicule
+    <strong th:text="${registration}">AB-123-CD</strong>.
+  </p>
+  <table th:replace="~{mail/fragments :: facts(${ { {'Référence', reference}, {'Nature', fmt.label(type)},
+      {'Survenu le', fmt.dateTime(occurredAt)} } })}"></table>
+  <a th:replace="~{mail/fragments :: button(${portalUrl + '/sinistres/' + incidentId}, 'Instruire le sinistre')}"></a>
+</section>
+</body>
+</html>

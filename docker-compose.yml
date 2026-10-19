@@ -1,0 +1,699 @@
+# FleetPilot: the whole platform with a single command.
+#
+#   docker compose up -d --build              core platform (database, messaging, services)
+#   docker compose --profile tools up -d      + Kafka UI           http://localhost:8091
+#
+# Extranet of the lessors (legacy WAR on Tomcat behind Apache httpd): http://localhost:8095/extranet
+# Mailpit (every e-mail sent by FleetPilot): http://localhost:8025   ActiveMQ console: http://localhost:8161 (admin/admin)
+#   docker compose --profile quality up -d    + SonarQube          http://localhost:9000
+#   docker compose --profile observability up -d   + analytics pipeline, ELK  Kibana: http://localhost:5601
+#
+# Every service has a health check; services start only when what they depend on is healthy.
+
+name: fleetpilot
+
+x-json-logging: &json-logging
+  # json-file (Docker Desktop defaults to the binary "local" driver): Filebeat reads these files for Kibana
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "3"
+
+x-spring-service: &spring-service
+  restart: unless-stopped
+  environment: &spring-env
+    LOGGING_STRUCTURED_FORMAT_CONSOLE: ecs
+    KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    OIDC_ISSUER_URI: http://localhost:8180/realms/fleetpilot
+    OIDC_PUBLIC_ISSUER_URI: http://localhost:8180/realms/fleetpilot
+    OIDC_JWK_SET_URI: http://keycloak:8080/realms/fleetpilot/protocol/openid-connect/certs
+    DB_USER: fleetpilot
+    DB_PASSWORD: fleetpilot
+
+services:
+  postgres:
+    logging: *json-logging
+    image: postgres:18.6
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: fleetpilot
+      POSTGRES_PASSWORD: fleetpilot
+      POSTGRES_DB: fleetpilot
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql
+      - ./infra/postgres/init:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U fleetpilot -d fleet_vehicle"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  kafka:
+    logging: *json-logging
+    image: apache/kafka:4.2.2
+    restart: unless-stopped
+    # Single node in KRaft mode (no ZooKeeper): broker and controller in the same process.
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: INTERNAL://:9092,EXTERNAL://:9094,CONTROLLER://:9093
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:9092,EXTERNAL://localhost:9094
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"
+      KAFKA_NUM_PARTITIONS: 6
+    ports:
+      - "9094:9094"
+    volumes:
+      - kafka-data:/var/lib/kafka/data
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/kafka/bin/kafka-broker-api-versions.sh --bootstrap-server localhost:9092 > /dev/null 2>&1"]
+      interval: 10s
+      timeout: 10s
+      retries: 15
+      start_period: 15s
+
+  openldap:
+    logging: *json-logging
+    image: osixia/openldap:1.5.0
+    restart: unless-stopped
+    # Directory of the FleetPilot staff, federated by Keycloak. The LDIF files are loaded when the volume is created.
+    command: --copy-service
+    environment:
+      LDAP_ORGANISATION: FleetPilot
+      LDAP_DOMAIN: fleetpilot.dev
+      LDAP_ADMIN_PASSWORD: fleetpilot-ldap
+      LDAP_TLS: "false"
+    ports:
+      - "1389:389"
+    volumes:
+      - ./infra/ldap/ldif:/container/service/slapd/assets/config/bootstrap/ldif/custom:ro
+      - ldap-data:/var/lib/ldap
+      - ldap-config:/etc/ldap/slapd.d
+    healthcheck:
+      test: ["CMD-SHELL", "ldapsearch -x -H ldap://localhost -D cn=admin,dc=fleetpilot,dc=dev -w fleetpilot-ldap -b ou=roles,dc=fleetpilot,dc=dev cn=fleet-manager | grep -q numEntries"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  keycloak:
+    logging: *json-logging
+    image: quay.io/keycloak/keycloak:26.7.5
+    restart: unless-stopped
+    # Imports the fleetpilot realm (roles, clients, demo accounts, LDAP federation) on the first start.
+    command: start-dev --import-realm
+    environment:
+      KC_DB: postgres
+      KC_DB_URL: jdbc:postgresql://postgres:5432/keycloak
+      KC_DB_USERNAME: fleetpilot
+      KC_DB_PASSWORD: fleetpilot
+      # Browsers and tokens use the public URL; services reach Keycloak on the internal network.
+      KC_HOSTNAME: http://localhost:8180
+      KC_HOSTNAME_BACKCHANNEL_DYNAMIC: "true"
+      KC_HEALTH_ENABLED: "true"
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+      LDAP_ADMIN_PASSWORD: fleetpilot-ldap
+    ports:
+      - "8180:8080"
+    volumes:
+      - ./infra/keycloak/realms:/opt/keycloak/data/import:ro
+      - ./infra/keycloak/themes/fleetpilot:/opt/keycloak/themes/fleetpilot:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+      openldap:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c 'exec 3<>/dev/tcp/localhost/9000 && printf \"GET /health/ready HTTP/1.0\\r\\n\\r\\n\" >&3 && grep -q UP <&3'"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
+
+  activemq:
+    logging: *json-logging
+    image: apache/activemq-classic:6.2.0
+    restart: unless-stopped
+    # JMS work queues: e-mails to send (fleetpilot.notifications), reports to build (fleetpilot.reports)
+    ports:
+      - "61616:61616"
+      - "8161:8161"
+    volumes:
+      - activemq-data:/opt/apache-activemq/data
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c 'exec 3<>/dev/tcp/localhost/61616'"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+      start_period: 10s
+
+  mailpit:
+    logging: *json-logging
+    image: axllent/mailpit:v1.31.6
+    restart: unless-stopped
+    # Catches every e-mail sent by FleetPilot in development; web interface on http://localhost:8025
+    environment:
+      MP_MAX_MESSAGES: 20000
+    ports:
+      - "8025:8025"
+      - "1025:1025"
+    healthcheck:
+      test: ["CMD", "/mailpit", "readyz"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  kafka-ui:
+    logging: *json-logging
+    image: kafbat/kafka-ui:v1.5.0
+    profiles: ["tools"]
+    environment:
+      KAFKA_CLUSTERS_0_NAME: fleetpilot
+      KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
+    ports:
+      - "8091:8080"
+    depends_on:
+      kafka:
+        condition: service_healthy
+
+  sonarqube:
+    logging: *json-logging
+    image: sonarqube:26.10.0.133078-community
+    profiles: ["quality"]
+    environment:
+      SONAR_JDBC_URL: jdbc:postgresql://postgres:5432/sonarqube
+      SONAR_JDBC_USERNAME: fleetpilot
+      SONAR_JDBC_PASSWORD: fleetpilot
+      # Elasticsearch embedded in SonarQube refuses to start on low mmap limits; this check is for production hosts.
+      SONAR_SEARCH_JAVAADDITIONALOPTS: -Dnode.store.allow_mmap=false
+    ports:
+      - "9000:9000"
+    volumes:
+      - sonarqube-data:/opt/sonarqube/data
+      - sonarqube-extensions:/opt/sonarqube/extensions
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  vehicle-service:
+    logging: *json-logging
+    <<: *spring-service
+    build:
+      context: ./back
+      args:
+        SERVICE: vehicle-service
+    image: fleetpilot/vehicle-service:latest
+    environment:
+      <<: *spring-env
+      DB_URL: jdbc:postgresql://postgres:5432/fleet_vehicle?reWriteBatchedInserts=true
+      DEMO_DATA: "true"
+      # Administration of the user accounts, through the admin API of Keycloak
+      FLEETPILOT_IDENTITY_KEYCLOAK_URL: http://keycloak:8080
+    ports:
+      - "8081:8081"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c 'exec 3<>/dev/tcp/localhost/8081 && printf \"GET /actuator/health/readiness HTTP/1.0\\r\\n\\r\\n\" >&3 && grep -q UP <&3'"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 40s
+
+  quote-service:
+    logging: *json-logging
+    <<: *spring-service
+    build:
+      context: ./back
+      args:
+        SERVICE: quote-service
+    image: fleetpilot/quote-service:latest
+    environment:
+      <<: *spring-env
+      DB_URL: jdbc:postgresql://postgres:5432/fleet_quote?reWriteBatchedInserts=true
+      VEHICLE_SERVICE_URL: http://vehicle-service:8081
+      OIDC_TOKEN_URI: http://keycloak:8080/realms/fleetpilot/protocol/openid-connect/token
+      DEMO_DATA: "true"
+    ports:
+      - "8083:8083"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+      vehicle-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c 'exec 3<>/dev/tcp/localhost/8083 && printf \"GET /actuator/health/readiness HTTP/1.0\\r\\n\\r\\n\" >&3 && grep -q UP <&3'"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 60s
+
+  notification-service:
+    logging: *json-logging
+    <<: *spring-service
+    build:
+      context: ./back
+      args:
+        SERVICE: notification-service
+    image: fleetpilot/notification-service:latest
+    environment:
+      <<: *spring-env
+      DB_URL: jdbc:postgresql://postgres:5432/fleet_notification
+      VEHICLE_SERVICE_URL: http://vehicle-service:8081
+      QUOTE_SERVICE_URL: http://quote-service:8083
+      OIDC_TOKEN_URI: http://keycloak:8080/realms/fleetpilot/protocol/openid-connect/token
+      ACTIVEMQ_URL: tcp://activemq:61616
+      MAIL_HOST: mailpit
+      MAIL_PORT: "1025"
+    ports:
+      - "8084:8084"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      activemq:
+        condition: service_healthy
+      mailpit:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c 'exec 3<>/dev/tcp/localhost/8084 && printf \"GET /actuator/health/readiness HTTP/1.0\\r\\n\\r\\n\" >&3 && grep -q UP <&3'"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 40s
+
+  reporting-service:
+    logging: *json-logging
+    <<: *spring-service
+    build:
+      context: ./back
+      args:
+        SERVICE: reporting-service
+    image: fleetpilot/reporting-service:latest
+    environment:
+      <<: *spring-env
+      DB_URL: jdbc:postgresql://postgres:5432/fleet_reporting
+      VEHICLE_SERVICE_URL: http://vehicle-service:8081
+      QUOTE_SERVICE_URL: http://quote-service:8083
+      OIDC_TOKEN_URI: http://keycloak:8080/realms/fleetpilot/protocol/openid-connect/token
+      ACTIVEMQ_URL: tcp://activemq:61616
+    ports:
+      - "8085:8085"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      activemq:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c 'exec 3<>/dev/tcp/localhost/8085 && printf \"GET /actuator/health/readiness HTTP/1.0\\r\\n\\r\\n\" >&3 && grep -q UP <&3'"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 40s
+
+  telemetry-service:
+    logging: *json-logging
+    <<: *spring-service
+    build:
+      context: ./back
+      args:
+        SERVICE: telemetry-service
+    image: fleetpilot/telemetry-service:latest
+    environment:
+      <<: *spring-env
+      DB_URL: jdbc:postgresql://postgres:5432/fleet_telemetry?reWriteBatchedInserts=true
+      VEHICLE_SERVICE_URL: http://vehicle-service:8081
+      OIDC_TOKEN_URI: http://keycloak:8080/realms/fleetpilot/protocol/openid-connect/token
+      DEMO_DATA: "true"
+    ports:
+      - "8086:8086"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c 'exec 3<>/dev/tcp/localhost/8086 && printf \"GET /actuator/health/readiness HTTP/1.0\\r\\n\\r\\n\" >&3 && grep -q UP <&3'"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 40s
+
+  vehicle-simulator:
+    logging: *json-logging
+    # The boxes of the connected vehicles: 160 vehicles driving real roads around their base, on Kafka
+    <<: *spring-service
+    build:
+      context: ./back
+      args:
+        SERVICE: vehicle-simulator
+    image: fleetpilot/vehicle-simulator:latest
+    environment:
+      <<: *spring-env
+      VEHICLE_SERVICE_URL: http://vehicle-service:8081
+      OIDC_TOKEN_URI: http://keycloak:8080/realms/fleetpilot/protocol/openid-connect/token
+      SIMULATOR_VEHICLES: "160"
+    ports:
+      - "8087:8087"
+    depends_on:
+      kafka:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+      vehicle-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c 'exec 3<>/dev/tcp/localhost/8087 && printf \"GET /actuator/health/readiness HTTP/1.0\\r\\n\\r\\n\" >&3 && grep -q UP <&3'"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
+
+  integration-esb:
+    logging: *json-logging
+    # Enterprise service bus (Apache Camel): partner files dropped in the inbox volume, insurer API, fuel cards
+    <<: *spring-service
+    build:
+      context: ./back
+      args:
+        SERVICE: integration-esb
+    image: fleetpilot/integration-esb:latest
+    environment:
+      <<: *spring-env
+      DB_URL: jdbc:postgresql://postgres:5432/fleet_integration?reWriteBatchedInserts=true
+      VEHICLE_SERVICE_URL: http://vehicle-service:8081
+      QUOTE_SERVICE_URL: http://quote-service:8083
+      OIDC_TOKEN_URI: http://keycloak:8080/realms/fleetpilot/protocol/openid-connect/token
+      INTEGRATION_INBOX: /data/inbox
+      DEMO_DATA: "true"
+    volumes:
+      - integration-inbox:/data/inbox
+    ports:
+      - "8088:8088"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+      vehicle-service:
+        condition: service_healthy
+      quote-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c 'exec 3<>/dev/tcp/localhost/8088 && printf \"GET /actuator/health/readiness HTTP/1.0\\r\\n\\r\\n\" >&3 && grep -q UP <&3'"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 40s
+
+  energy-service:
+    logging: *json-logging
+    <<: *spring-service
+    build:
+      context: ./back
+      args:
+        SERVICE: energy-service
+    image: fleetpilot/energy-service:latest
+    environment:
+      <<: *spring-env
+      DB_URL: jdbc:postgresql://postgres:5432/fleet_energy?reWriteBatchedInserts=true
+      VEHICLE_SERVICE_URL: http://vehicle-service:8081
+      TELEMETRY_SERVICE_URL: http://telemetry-service:8086
+      OIDC_TOKEN_URI: http://keycloak:8080/realms/fleetpilot/protocol/openid-connect/token
+    ports:
+      - "8090:8090"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+      vehicle-service:
+        condition: service_healthy
+      telemetry-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c 'exec 3<>/dev/tcp/localhost/8090 && printf \"GET /actuator/health/readiness HTTP/1.0\\r\\n\\r\\n\" >&3 && grep -q UP <&3'"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 40s
+
+  graphql-gateway:
+    logging: *json-logging
+    <<: *spring-service
+    build:
+      context: ./back
+      args:
+        SERVICE: graphql-gateway
+    image: fleetpilot/graphql-gateway:latest
+    environment:
+      <<: *spring-env
+      VEHICLE_SERVICE_URL: http://vehicle-service:8081
+      QUOTE_SERVICE_URL: http://quote-service:8083
+      NOTIFICATION_SERVICE_URL: http://notification-service:8084
+      REPORTING_SERVICE_URL: http://reporting-service:8085
+      TELEMETRY_SERVICE_URL: http://telemetry-service:8086
+      INTEGRATION_SERVICE_URL: http://integration-esb:8088
+      ENERGY_SERVICE_URL: http://energy-service:8090
+    ports:
+      - "8082:8082"
+    depends_on:
+      vehicle-service:
+        condition: service_healthy
+      quote-service:
+        condition: service_healthy
+      notification-service:
+        condition: service_healthy
+      reporting-service:
+        condition: service_healthy
+      telemetry-service:
+        condition: service_healthy
+      integration-esb:
+        condition: service_healthy
+      energy-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c 'exec 3<>/dev/tcp/localhost/8082 && printf \"GET /actuator/health/readiness HTTP/1.0\\r\\n\\r\\n\" >&3 && grep -q UP <&3'"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 20s
+
+  web:
+    logging: *json-logging
+    # Nginx: the web portal and the single entry point of the APIs, on http://localhost
+    build:
+      context: .
+      dockerfile: front/Dockerfile
+    image: fleetpilot/web:latest
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      graphql-gateway:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://127.0.0.1/healthz || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  # ---------------------------------------------------------------- lessor extranet v1 (legacy WAR)
+  # Apache httpd http://localhost:8095/extranet  ->  Tomcat 11  ->  legacy-portal-war (servlets and JSP)
+
+  tomcat:
+    logging: *json-logging
+    build:
+      context: ./back
+      dockerfile: ../infra/tomcat/Dockerfile
+      additional_contexts:
+        tomcat: ./infra/tomcat
+    image: fleetpilot/tomcat-extranet:latest
+    restart: unless-stopped
+    environment:
+      # The browser reaches Keycloak on localhost:8180 (issuer of the tokens); Tomcat calls it on the Docker network
+      FLEETPILOT_ISSUER: http://localhost:8180/realms/fleetpilot
+      FLEETPILOT_ISSUER_INTERNAL: http://keycloak:8080/realms/fleetpilot
+      FLEETPILOT_CLIENT_ID: fleetpilot-legacy-portal
+      FLEETPILOT_CLIENT_SECRET: dev-legacy-portal-secret
+      FLEETPILOT_API_URL: http://vehicle-service:8081
+      FLEETPILOT_PUBLIC_URL: http://localhost:8095
+    depends_on:
+      vehicle-service:
+        condition: service_healthy
+      keycloak:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c 'exec 3<>/dev/tcp/localhost/8080 && printf \"GET /extranet/static/extranet.css HTTP/1.0\r\n\r\n\" >&3 && grep -q \"200\" <&3'"]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
+
+  apache:
+    logging: *json-logging
+    build:
+      context: ./infra/apache
+    image: fleetpilot/apache-extranet:latest
+    restart: unless-stopped
+    ports:
+      - "8095:80"
+    depends_on:
+      tomcat:
+        condition: service_healthy
+
+  # ---------------------------------------------------------------- observability profile: analytics and logs
+  #   docker compose --profile observability up -d     Kibana on http://localhost:5601
+
+  elasticsearch:
+    logging: *json-logging
+    image: elasticsearch:9.5.2
+    profiles: ["observability"]
+    restart: unless-stopped
+    environment:
+      discovery.type: single-node
+      # Local demonstration: no TLS nor users (in production: security on, Kibana behind Keycloak)
+      xpack.security.enabled: "false"
+      ES_JAVA_OPTS: "-Xms1g -Xmx1g"
+      cluster.routing.allocation.disk.threshold_enabled: "false"
+    ports:
+      - "9200:9200"
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s http://localhost:9200/_cluster/health | grep -qE '\"status\":\"(green|yellow)\"'"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 30s
+
+  logstash:
+    logging: *json-logging
+    image: logstash:9.5.2
+    profiles: ["observability"]
+    restart: unless-stopped
+    environment:
+      LS_JAVA_OPTS: "-Xms384m -Xmx384m"
+    volumes:
+      - ./infra/elk/logstash/logstash.yml:/usr/share/logstash/config/logstash.yml:ro
+      - ./infra/elk/logstash/pipeline:/usr/share/logstash/pipeline:ro
+      - ./infra/elk/kibana/logs-template.json:/usr/share/logstash/templates/logs-template.json:ro
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+
+  filebeat:
+    logging: *json-logging
+    image: docker.elastic.co/beats/filebeat:9.5.2
+    profiles: ["observability"]
+    restart: unless-stopped
+    user: root
+    command: ["filebeat", "-e", "--strict.perms=false"]
+    volumes:
+      - ./infra/elk/filebeat/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - filebeat-data:/usr/share/filebeat/data
+    depends_on:
+      - logstash
+
+  kibana:
+    logging: *json-logging
+    image: kibana:9.5.2
+    profiles: ["observability"]
+    restart: unless-stopped
+    volumes:
+      - ./infra/elk/kibana/kibana.yml:/usr/share/kibana/config/kibana.yml:ro
+    ports:
+      - "5601:5601"
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "curl -s http://localhost:5601/api/status | grep -q '\"level\":\"available\"'"]
+      interval: 10s
+      timeout: 5s
+      retries: 40
+      start_period: 40s
+
+  kibana-setup:
+    logging: *json-logging
+    # One shot: index template of the logs, data views and dashboards, Kibana settings
+    image: elasticsearch:9.5.2
+    profiles: ["observability"]
+    entrypoint: ["bash", "/setup/setup.sh"]
+    volumes:
+      - ./infra/elk/kibana:/setup:ro
+    depends_on:
+      kibana:
+        condition: service_healthy
+
+  bigdata-pipeline:
+    logging: *json-logging
+    <<: *spring-service
+    profiles: ["observability"]
+    build:
+      context: ./back
+      args:
+        SERVICE: bigdata-pipeline
+    image: fleetpilot/bigdata-pipeline:latest
+    environment:
+      <<: *spring-env
+      ELASTICSEARCH_URL: http://elasticsearch:9200
+      VEHICLE_SERVICE_URL: http://vehicle-service:8081
+      TELEMETRY_SERVICE_URL: http://telemetry-service:8086
+      OIDC_TOKEN_URI: http://keycloak:8080/realms/fleetpilot/protocol/openid-connect/token
+      STREAMS_STATE_DIR: /data/streams
+    ports:
+      - "8089:8089"
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+      kafka:
+        condition: service_healthy
+      vehicle-service:
+        condition: service_healthy
+      telemetry-service:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "bash -c 'exec 3<>/dev/tcp/localhost/8089 && printf \"GET /actuator/health/readiness HTTP/1.0\\r\\n\\r\\n\" >&3 && grep -q UP <&3'"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 40s
+
+volumes:
+  activemq-data:
+  elasticsearch-data:
+  filebeat-data:
+  integration-inbox:
+  ldap-data:
+  ldap-config:
+  postgres-data:
+  kafka-data:
+  sonarqube-data:
+  sonarqube-extensions:

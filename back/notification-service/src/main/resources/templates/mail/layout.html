@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<!--/*
+  Layout of every FleetPilot e-mail. Inline styles and tables only: e-mail clients ignore most of CSS.
+  A template replaces its whole page with this fragment, giving its title and its section.
+*/-->
+<html xmlns:th="http://www.thymeleaf.org" th:fragment="email(pageTitle, pageContent)" lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title th:replace="${pageTitle}">FleetPilot</title>
+</head>
+<body style="margin:0;padding:0;background:#f5f6f8;font-family:Helvetica,Arial,sans-serif;color:#101828;">
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#f5f6f8;padding:28px 12px;">
+  <tr>
+    <td align="center">
+      <table role="presentation" width="600" cellpadding="0" cellspacing="0"
+             style="max-width:600px;width:100%;background:#ffffff;border:1px solid #e3e6eb;border-radius:12px;">
+        <tr>
+          <td style="padding:20px 28px;border-bottom:1px solid #e3e6eb;">
+            <span style="display:inline-block;width:22px;height:22px;border-radius:6px;background:#0f766e;
+                         vertical-align:middle;"></span>
+            <span style="font-size:17px;font-weight:bold;color:#101828;vertical-align:middle;margin-left:8px;">FleetPilot</span>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:28px;font-size:14px;line-height:1.6;" th:insert="${pageContent}"></td>
+        </tr>
+        <tr>
+          <td style="padding:16px 28px;border-top:1px solid #e3e6eb;font-size:12px;color:#667085;line-height:1.5;">
+            Cet e-mail est envoyé automatiquement par FleetPilot, la plateforme de gestion de flotte.
+            Merci de ne pas y répondre : retrouvez toutes les informations dans votre espace
+            <a th:href="${portalUrl}" href="#" style="color:#0f766e;">FleetPilot</a>.
+          </td>
+        </tr>
+      </table>
+    </td>
+  </tr>
+</table>
+</body>
+</html>

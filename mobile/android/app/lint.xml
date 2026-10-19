@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- The labels of the API codes are read by name (Labels.label: "<group>_<CODE>"), which lint cannot follow. -->
+<lint>
+    <issue id="UnusedResources">
+        <ignore regexp="R\.string\.(error|item|energy|fuel_kind|incident_type|incident_status|inspection_kind|alert|network|deadline|urgency|level|condition)_" />
+    </issue>
+</lint>

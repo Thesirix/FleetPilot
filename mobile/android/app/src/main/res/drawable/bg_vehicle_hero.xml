@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- My vehicle on the home screen: the brand gradient, as in the web app -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="rectangle">
+    <corners android:radius="16dp" />
+    <gradient
+        android:angle="315"
+        android:endColor="#FF14A394"
+        android:centerColor="#FF0F766E"
+        android:startColor="#FF0B4F4A"
+        android:type="linear" />
+</shape>

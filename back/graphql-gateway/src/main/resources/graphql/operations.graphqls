@@ -1,0 +1,121 @@
+# Reports and indicators (reporting-service), journal of the e-mails (notification-service).
+
+enum ReportType { FLEET_INVENTORY TCO QUOTES DEADLINES SAVINGS }
+enum ReportStatus { PENDING RUNNING READY FAILED }
+enum NotificationStatus { QUEUED SENDING SENT FAILED }
+
+extend type Query {
+  "Fleet indicators over twelve months: total cost of ownership, cost per kilometre, claims, immobilisation."
+  indicators(companyId: ID): Indicators!
+  "The reports that can be requested."
+  reportTypes: [ReportTypeInfo!]!
+  "My reports, most recent first. The file is downloaded from /api/v1/reports/{id}/file."
+  reports(page: Int = 0, size: Int = 20): ReportPage!
+  report(id: ID!): Report
+
+  "Staff: the e-mails sent by FleetPilot."
+  notifications(filter: NotificationFilter, page: Int = 0, size: Int = 20): NotificationPage!
+  notification(id: ID!): NotificationDetail
+  "Staff: e-mails of the last 30 days, by status and template."
+  notificationStats: NotificationStats!
+}
+
+extend type Mutation {
+  "Request a report; it is built in the background and the requester gets an e-mail when it is ready."
+  requestReport(type: ReportType!, companyId: ID, from: Date, to: Date): Report!
+  "Staff: send a failed e-mail again."
+  retryNotification(id: ID!): NotificationDetail!
+}
+
+type Indicators {
+  vehicles: Int!
+  totalCost: Float!
+  monthlyCostPerVehicle: Float!
+  costPerKm: Float
+  rent: Float!
+  maintenance: Float!
+  claims: Float!
+  claimsPer100Vehicles: Float!
+  immobilisationRate: Float!
+  leasedShare: Float!
+  asOf: Date!
+}
+
+type ReportTypeInfo {
+  type: ReportType!
+  title: String!
+  format: String!
+  periodic: Boolean!
+}
+
+type Report {
+  id: ID!
+  type: ReportType!
+  format: String!
+  title: String!
+  companyId: ID
+  periodFrom: Date
+  periodTo: Date
+  status: ReportStatus!
+  requestedAt: DateTime!
+  completedAt: DateTime
+  fileName: String
+  sizeBytes: Int
+  rowCount: Int
+  error: String
+}
+
+type ReportPage {
+  content: [Report!]!
+  page: Int!
+  size: Int!
+  totalElements: Int!
+  totalPages: Int!
+}
+
+input NotificationFilter {
+  status: NotificationStatus
+  template: String
+  "Recipient, subject or related record."
+  q: String
+}
+
+type Notification {
+  id: ID!
+  template: String!
+  recipient: String!
+  recipientName: String
+  subject: String
+  status: NotificationStatus!
+  attempts: Int!
+  lastError: String
+  relatedType: String
+  relatedId: String
+  attachments: String
+  createdAt: DateTime!
+  sentAt: DateTime
+}
+
+type NotificationDetail {
+  summary: Notification!
+  "The e-mail as it was sent (HTML)."
+  bodyHtml: String
+  messageId: String
+}
+
+type NotificationPage {
+  content: [Notification!]!
+  page: Int!
+  size: Int!
+  totalElements: Int!
+  totalPages: Int!
+}
+
+type TemplateCount { template: String! count: Int! }
+
+type NotificationStats {
+  sent: Int!
+  queued: Int!
+  failed: Int!
+  byTemplate: [TemplateCount!]!
+}

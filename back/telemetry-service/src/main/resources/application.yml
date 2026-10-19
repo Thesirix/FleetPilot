@@ -1,0 +1,117 @@
+server:
+  port: 8086
+  shutdown: graceful
+  forward-headers-strategy: framework
+
+spring:
+  application:
+    name: telemetry-service
+  threads:
+    virtual:
+      enabled: true
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/fleet_telemetry}
+    username: ${DB_USER:fleetpilot}
+    password: ${DB_PASSWORD:fleetpilot}
+    hikari:
+      maximum-pool-size: 12
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: UTC
+  flyway:
+    locations: classpath:db/migration
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${OIDC_ISSUER_URI:http://localhost:8180/realms/fleetpilot}
+          jwk-set-uri: ${OIDC_JWK_SET_URI:http://localhost:8180/realms/fleetpilot/protocol/openid-connect/certs}
+          audiences: fleetpilot-api
+      # The telemetry service reads the fleet module as itself (client_credentials)
+      client:
+        registration:
+          fleetpilot-services:
+            provider: keycloak
+            client-id: fleetpilot-services
+            client-secret: ${SERVICES_CLIENT_SECRET:dev-fleetpilot-services-secret}
+            authorization-grant-type: client_credentials
+            scope: openid
+        provider:
+          keycloak:
+            token-uri: ${OIDC_TOKEN_URI:http://localhost:8180/realms/fleetpilot/protocol/openid-connect/token}
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9094}
+    producer:
+      acks: all
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      properties:
+        enable.idempotence: true
+        delivery.timeout.ms: 15000
+        request.timeout.ms: 10000
+        max.block.ms: 5000
+    consumer:
+      # A restarted service resumes from its offsets; a new one starts from the live flow, not the backlog
+      auto-offset-reset: latest
+      max-poll-records: 500
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+  data:
+    web:
+      pageable:
+        max-page-size: 100
+  mvc:
+    async:
+      # The live stream stays open as long as the page does
+      request-timeout: -1
+
+fleetpilot:
+  oidc:
+    public-issuer-uri: ${OIDC_PUBLIC_ISSUER_URI:http://localhost:8180/realms/fleetpilot}
+  services:
+    vehicle-url: ${VEHICLE_SERVICE_URL:http://localhost:8081}
+  outbox:
+    relay:
+      enabled: true
+      interval: 1000
+  demo-data:
+    enabled: ${DEMO_DATA:false}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: always
+
+info:
+  app:
+    name: FleetPilot telemetry-service
+    description: Connected vehicles, live positions, trips, usage history and alerts
+
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    persist-authorization: true
+    oauth:
+      client-id: fleetpilot-swagger
+      use-pkce-with-authorization-code-grant: true
+      scopes: openid
+    operations-sorter: alpha
+    tags-sorter: alpha
+
+logging:
+  level:
+    com.fleetpilot: INFO
+    org.apache.kafka: WARN

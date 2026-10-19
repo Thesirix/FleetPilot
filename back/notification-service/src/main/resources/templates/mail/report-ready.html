@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{mail/layout :: email(~{::title}, ~{::section})}" lang="fr">
+<head><title th:text="|Votre rapport est prêt : ${title}|">Rapport prêt</title></head>
+<body>
+<section>
+  <p style="margin:0 0 14px;">Bonjour<span th:if="${recipientName}" th:text="| ${recipientName}|"></span>,</p>
+  <p style="margin:0 0 14px;">
+    Le rapport <strong th:text="${title}">Rapport</strong> que vous avez demandé est prêt
+    (<span th:text="${fileName}">fichier</span>, <span th:text="${rows}">0</span> lignes).
+    Il reste disponible au téléchargement dans la page Rapports.
+  </p>
+  <a th:replace="~{mail/fragments :: button(${portalUrl + '/rapports'}, 'Télécharger le rapport')}"></a>
+</section>
+</body>
+</html>

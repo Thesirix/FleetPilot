@@ -1,0 +1,11 @@
+# Kibana of the local stack: French interface, no telemetry nor security banners (security is off locally, see
+# docker-compose.yml; in production Kibana sits behind Keycloak with security on).
+server.host: "0.0.0.0"
+server.publicBaseUrl: "http://localhost:5601"
+elasticsearch.hosts: ["http://elasticsearch:9200"]
+i18n.locale: "fr-FR"
+telemetry.optIn: false
+telemetry.allowChangingOptInStatus: false
+telemetry.banner: false
+security.showInsecureClusterWarning: false
+newsfeed.enabled: false

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="fr">
+<head>
+  <meta charset="UTF-8"/>
+  <title th:text="|Bon de commande ${quote.reference}|">Bon de commande</title>
+  <style th:utext="${documentStyles}"></style>
+</head>
+<body>
+<div class="header">
+  <div>
+    <div class="brand">FleetPilot</div>
+    <div class="brand-sub">Gestion de flotte pour le compte des entreprises clientes</div>
+  </div>
+  <div class="doc-title">
+    <h1>Bon de commande</h1>
+    <p th:text="|N° ${quote.reference}|">N°</p>
+    <p class="muted" th:text="|Émis le ${fmt.date(quote.decidedAt)}|">Date</p>
+  </div>
+</div>
+
+<div class="parties">
+  <div>
+    <div class="label">Donneur d'ordre</div>
+    <p><strong>FleetPilot</strong><br/>Pour le compte de l'entreprise cliente du véhicule<br/>
+      Gestionnaire : <span th:text="${quote.decidedBy}">gestionnaire</span></p>
+  </div>
+  <div>
+    <div class="label">Garage</div>
+    <p><strong th:text="${quote.garage.name}">Garage</strong><br/>
+      <span th:text="${quote.garage.city}">Ville</span><br/>
+      Votre devis : <span class="mono" th:text="${quote['garageReference'] ?: '-'}">D</span></p>
+  </div>
+</div>
+
+<h2>Véhicule et travaux</h2>
+<table class="grid">
+  <tr><th>Immatriculation</th><th>Véhicule</th><th>Kilométrage</th><th>Travaux</th></tr>
+  <tr>
+    <td class="mono" th:text="${quote.registration}">AB</td>
+    <td th:text="${quote['vehicle'] != null ? quote['vehicle']['make'] + ' ' + quote['vehicle']['model'] : '-'}">Véhicule</td>
+    <td th:text="${quote['mileage'] != null ? fmt.number(quote['mileage']) + ' km' : '-'}">km</td>
+    <td th:text="${quote.description}">Travaux</td>
+  </tr>
+</table>
+
+<h2>Détail</h2>
+<table class="grid">
+  <tr>
+    <th>#</th><th>Désignation</th><th>Type</th><th class="right">Quantité</th><th class="right">Prix unitaire HT</th>
+    <th class="right">Montant HT</th>
+  </tr>
+  <tr th:each="line : ${quote.lines}">
+    <td th:text="${line.position}">1</td>
+    <td><span th:text="${line.label}">Ligne</span> <span class="muted mono" th:text="${line['code']}"></span></td>
+    <td th:text="${fmt.label(line.kind)}">Pièce</td>
+    <td class="right" th:text="${line.kind == 'LABOUR' ? fmt.quantity(line.quantity) + ' h' : fmt.quantity(line.quantity)}">1</td>
+    <td class="right" th:text="${fmt.money(line.unitPrice)}">0</td>
+    <td class="right" th:text="${fmt.money(line.amount)}">0</td>
+  </tr>
+  <tr class="total">
+    <td colspan="5">Total du devis HT</td>
+    <td class="right" th:text="${fmt.money(quote.amount)}">0</td>
+  </tr>
+  <tr th:if="${quote.acceptedAmount < quote.amount}">
+    <td colspan="5" class="right">Remise négociée</td>
+    <td class="right success" th:text="|- ${fmt.money(quote.amount - quote.acceptedAmount)}|">0</td>
+  </tr>
+  <tr>
+    <td colspan="5" class="right"><strong>Montant commandé HT</strong></td>
+    <td class="right"><strong th:text="${fmt.money(quote.acceptedAmount)}">0</strong></td>
+  </tr>
+  <tr>
+    <td colspan="5" class="right">TVA 20 %</td>
+    <td class="right" th:text="${fmt.vat(quote.acceptedAmount)}">0</td>
+  </tr>
+  <tr class="total">
+    <td colspan="5" class="right">Montant TTC</td>
+    <td class="right" th:text="${fmt.withVat(quote.acceptedAmount)}">0</td>
+  </tr>
+</table>
+
+<div class="note">
+  La facture doit rappeler la référence <strong th:text="${quote.reference}">DEV</strong> et ne pas dépasser le
+  montant commandé de plus de 2 % (10 € minimum) : au-delà, elle est automatiquement contestée.
+  Les travaux non prévus au bon de commande font l'objet d'un nouveau devis.
+</div>
+</body>
+</html>

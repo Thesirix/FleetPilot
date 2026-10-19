@@ -1,0 +1,32 @@
+<%-- Top of every page: brand, lessor, user and sign-out. ${title} is set by the page. --%>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title><c:out value="${title}"/> · Extranet loueurs · FleetPilot</title>
+    <link rel="icon" type="image/svg+xml" href="${pageContext.request.contextPath}/static/logo.svg">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/static/extranet.css">
+</head>
+<body>
+<header class="topbar">
+    <a class="brand" href="${pageContext.request.contextPath}/">
+        <img src="${pageContext.request.contextPath}/static/logo.svg" alt="" width="26" height="26">
+        <span class="wordmark">FleetPilot</span>
+        <span class="product">Extranet loueurs</span>
+    </a>
+    <c:if test="${not empty user}">
+        <div class="account">
+            <span class="lessor"><c:out value="${user.lessor()}"/></span>
+            <span class="who">
+                <span class="avatar"><c:out value="${user.initials()}"/></span>
+                <span class="name"><c:out value="${user.name()}"/></span>
+            </span>
+            <form method="post" action="${pageContext.request.contextPath}/logout" class="inline">
+                <input type="hidden" name="_csrf" value="${csrf}">
+                <button type="submit" class="btn btn-ghost">Se déconnecter</button>
+            </form>
+        </div>
+    </c:if>
+</header>
+<main class="content">

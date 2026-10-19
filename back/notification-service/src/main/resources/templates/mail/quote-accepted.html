@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{mail/layout :: email(~{::title}, ~{::section})}" lang="fr">
+<head><title th:text="|Bon de commande : devis ${reference} accepté|">Bon de commande</title></head>
+<body>
+<section>
+  <p style="margin:0 0 14px;">Bonjour<span th:if="${recipientName}" th:text="| ${recipientName}|"></span>,</p>
+  <p style="margin:0 0 14px;">
+    Votre devis <strong th:text="${reference}">DEV</strong> pour le véhicule
+    <strong th:text="${registration}">AB-123-CD</strong><span th:if="${vehicle}" th:text="| (${vehicle})|"></span>
+    est accepté pour <strong th:text="${fmt.money(acceptedAmount)}">0 €</strong> HT.
+  </p>
+  <p th:if="${autoApproved}" th:replace="~{mail/fragments :: note('Ce devis est conforme au tarif de référence : il a été validé automatiquement.')}"></p>
+  <p th:if="${!autoApproved and comment != null}" th:replace="~{mail/fragments :: note(${comment})}"></p>
+  <table th:replace="~{mail/fragments :: facts(${ { {'Référence FleetPilot', reference}, {'Montant demandé HT', fmt.money(initialAmount)},
+      {'Montant accepté HT', fmt.money(acceptedAmount)}, {'Montant TTC', fmt.withVat(acceptedAmount)} } })}"></table>
+  <p style="margin:0 0 18px;">
+    Le bon de commande est joint à cet e-mail. Une fois les travaux réalisés, déclarez-les puis envoyez votre facture
+    depuis votre espace garage, en rappelant la référence <span th:text="${reference}">DEV</span>.
+  </p>
+  <a th:replace="~{mail/fragments :: button(${portalUrl + '/devis/' + quoteId}, 'Ouvrir le devis')}"></a>
+</section>
+</body>
+</html>

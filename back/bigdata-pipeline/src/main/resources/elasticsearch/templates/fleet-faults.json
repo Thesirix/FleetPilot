@@ -1,0 +1,59 @@
+{
+  "index_patterns": [
+    "fleet-faults"
+  ],
+  "priority": 200,
+  "template": {
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 0
+    },
+    "mappings": {
+      "dynamic": "false",
+      "properties": {
+        "vehicleId": {
+          "type": "keyword"
+        },
+        "companyId": {
+          "type": "keyword"
+        },
+        "companyName": {
+          "type": "keyword"
+        },
+        "registration": {
+          "type": "keyword"
+        },
+        "category": {
+          "type": "keyword"
+        },
+        "energy": {
+          "type": "keyword"
+        },
+        "makeModel": {
+          "type": "keyword"
+        },
+        "at": {
+          "type": "date"
+        },
+        "code": {
+          "type": "keyword"
+        },
+        "description": {
+          "type": "text",
+          "fields": {
+            "raw": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
+        },
+        "severity": {
+          "type": "keyword"
+        }
+      }
+    }
+  },
+  "_meta": {
+    "description": "FleetPilot analytics: fleet-faults"
+  }
+}

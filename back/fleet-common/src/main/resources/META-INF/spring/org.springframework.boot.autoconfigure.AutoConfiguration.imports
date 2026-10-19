@@ -1,0 +1,3 @@
+com.fleetpilot.common.web.FleetCommonAutoConfiguration
+com.fleetpilot.common.security.FleetSecurityAutoConfiguration
+com.fleetpilot.common.client.ServiceClientAutoConfiguration

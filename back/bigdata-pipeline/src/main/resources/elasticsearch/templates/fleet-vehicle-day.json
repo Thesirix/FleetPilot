@@ -1,0 +1,57 @@
+{
+  "index_patterns": [
+    "fleet-vehicle-day"
+  ],
+  "priority": 200,
+  "template": {
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 0
+    },
+    "mappings": {
+      "dynamic": "false",
+      "properties": {
+        "vehicleId": {
+          "type": "keyword"
+        },
+        "companyId": {
+          "type": "keyword"
+        },
+        "companyName": {
+          "type": "keyword"
+        },
+        "registration": {
+          "type": "keyword"
+        },
+        "category": {
+          "type": "keyword"
+        },
+        "energy": {
+          "type": "keyword"
+        },
+        "makeModel": {
+          "type": "keyword"
+        },
+        "day": {
+          "type": "date",
+          "format": "yyyy-MM-dd"
+        },
+        "distanceKm": {
+          "type": "integer"
+        },
+        "drivingMinutes": {
+          "type": "integer"
+        },
+        "maxSpeed": {
+          "type": "integer"
+        },
+        "source": {
+          "type": "keyword"
+        }
+      }
+    }
+  },
+  "_meta": {
+    "description": "FleetPilot analytics: fleet-vehicle-day"
+  }
+}

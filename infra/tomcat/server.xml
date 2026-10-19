@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Tomcat 11 of the lessor extranet (legacy-portal-war). Reached only by Apache httpd on the Docker network:
+  no shutdown port, no manager application, no version in the error pages, and the address of the browser restored
+  from the X-Forwarded headers of Apache.
+-->
+<Server port="-1" shutdown="SHUTDOWN">
+  <Listener className="org.apache.catalina.startup.VersionLoggerListener" />
+  <Listener className="org.apache.catalina.core.JreMemoryLeakPreventionListener" />
+  <Listener className="org.apache.catalina.mbeans.GlobalResourcesLifecycleListener" />
+  <Listener className="org.apache.catalina.core.ThreadLocalLeakPreventionListener" />
+
+  <Service name="Catalina">
+    <Connector port="8080" protocol="HTTP/1.1"
+               connectionTimeout="20000"
+               maxThreads="100"
+               URIEncoding="UTF-8"
+               server="FleetPilot" />
+
+    <Engine name="Catalina" defaultHost="localhost">
+      <Host name="localhost" appBase="webapps" unpackWARs="true" autoDeploy="false">
+        <!-- Client address and scheme as seen by Apache, for the logs and request.isSecure() -->
+        <Valve className="org.apache.catalina.valves.RemoteIpValve"
+               internalProxies=".*"
+               remoteIpHeader="x-forwarded-for"
+               protocolHeader="x-forwarded-proto" />
+        <!-- One JSON line per request on stdout, read by Filebeat like the logs of the other containers -->
+        <Valve className="org.apache.catalina.valves.JsonAccessLogValve"
+               directory="/dev" prefix="stdout" suffix="" fileDateFormat="" rotatable="false" buffered="false"
+               pattern="%{yyyy-MM-dd'T'HH:mm:ss.SSSXXX}t %a %m %U %s %b %D" />
+        <Valve className="org.apache.catalina.valves.ErrorReportValve" showReport="false" showServerInfo="false" />
+      </Host>
+    </Engine>
+  </Service>
+</Server>

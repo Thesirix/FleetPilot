@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- A shortcut of the home screen: icon, label and hint. -->
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:clickable="true"
+    android:focusable="true">
+
+    <View
+        android:id="@+id/wash"
+        android:layout_width="90dp"
+        android:layout_height="90dp"
+        android:layout_gravity="top|end"
+        android:alpha="0.55"
+        android:background="@drawable/bg_wash"
+        android:translationX="30dp"
+        android:translationY="-30dp" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:minHeight="112dp"
+        android:orientation="vertical"
+        android:padding="14dp">
+
+        <ImageView
+            android:id="@+id/icon"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@drawable/bg_icon_tile"
+            android:contentDescription="@null"
+            android:padding="9dp"
+            app:tint="@color/primary"
+            tools:src="@drawable/ic_fuel" />
+
+        <TextView
+            android:id="@+id/label"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:textAppearance="@style/Text.Body"
+            android:textStyle="bold"
+            tools:text="Saisir un plein" />
+
+        <TextView
+            android:id="@+id/hint"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:textAppearance="@style/Text.Muted"
+            tools:text="Carburant ou recharge" />
+    </LinearLayout>
+</com.google.android.material.card.MaterialCardView>

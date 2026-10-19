@@ -1,0 +1,147 @@
+# Connected vehicles and alert centre (telemetry-service). The live map follows the positions with the Server-Sent
+# Events of /api/v1/telemetry/stream; GraphQL serves the summaries, the files and the alerts.
+
+enum Activity { MOVING IDLING PARKED OFFLINE }
+enum AlertType { SPEEDING LONG_IDLE LOW_BATTERY ENGINE_FAULT ENGINE_WARNING SERVICE_DUE }
+enum AlertSeverity { INFO WARNING CRITICAL }
+enum AlertStatus { OPEN ACKNOWLEDGED RESOLVED }
+
+extend type Query {
+  "Connected vehicles by activity, kilometres of the day, open alerts by type."
+  telemetrySummary(companyId: ID): TelemetrySummary!
+  "Where the connected vehicles are now."
+  liveVehicles(companyId: ID): [LiveState!]!
+  "Telemetry file of a vehicle: live state, last trips, trouble codes, usage of 30 days, alerts."
+  vehicleTelemetry(vehicleId: ID!): VehicleTelemetry
+  "How each vehicle was used over 90 days: the basis of the energy transition study."
+  usageProfiles(companyId: ID): [UsageProfile!]!
+  "Alert centre, most recent first."
+  alerts(filter: AlertFilter, page: Int = 0, size: Int = 20): AlertPage!
+}
+
+extend type Mutation {
+  "Take an alert in charge."
+  acknowledgeAlert(id: ID!): Alert!
+  "Close an alert, with what was done."
+  resolveAlert(id: ID!, comment: String): Alert!
+}
+
+type LiveState {
+  vehicleId: ID!
+  companyId: ID!
+  registration: String!
+  latitude: Float!
+  longitude: Float!
+  speedKmh: Int!
+  heading: Int!
+  ignition: Boolean!
+  batteryPercent: Int
+  odometerKm: Int
+  lastPositionAt: DateTime!
+  activity: Activity!
+  openAlerts: Int!
+}
+
+type AlertTypeCount { type: AlertType! count: Int! }
+
+type TelemetrySummary {
+  connected: Int!
+  moving: Int!
+  idling: Int!
+  parked: Int!
+  offline: Int!
+  kilometresToday: Float!
+  openAlerts: Int!
+  "Most frequent first."
+  openAlertsByType: [AlertTypeCount!]!
+}
+
+type Trip {
+  id: ID!
+  startedAt: DateTime!
+  endedAt: DateTime!
+  startLat: Float!
+  startLon: Float!
+  endLat: Float!
+  endLon: Float!
+  distanceKm: Float!
+  maxSpeed: Int!
+  averageSpeed: Int!
+  idleMinutes: Int!
+}
+
+type Fault {
+  id: ID!
+  at: DateTime!
+  code: String!
+  description: String
+  severity: String!
+}
+
+type UsageDay {
+  day: Date!
+  distanceKm: Float!
+  trips: Int!
+  longestTripKm: Float!
+  drivingMinutes: Int!
+  maxSpeed: Int!
+}
+
+type VehicleTelemetry {
+  state: LiveState
+  trips: [Trip!]!
+  faults: [Fault!]!
+  usage: [UsageDay!]!
+  alerts: [Alert!]!
+}
+
+type UsageProfile {
+  vehicleId: ID!
+  companyId: ID!
+  observedDays: Int!
+  activeDays: Int!
+  totalKm: Float!
+  averageDailyKm: Float!
+  "95 % of the active days are shorter than this."
+  p95DailyKm: Float!
+  maxDailyKm: Float!
+  longestTripKm: Float!
+  daysOver150Km: Int!
+}
+
+input AlertFilter {
+  status: AlertStatus
+  type: AlertType
+  severity: AlertSeverity
+  companyId: ID
+  vehicleId: ID
+}
+
+type Alert {
+  id: ID!
+  vehicleId: ID!
+  companyId: ID!
+  registration: String
+  type: AlertType!
+  severity: AlertSeverity!
+  message: String!
+  value: Float
+  latitude: Float
+  longitude: Float
+  status: AlertStatus!
+  raisedAt: DateTime!
+  lastSeenAt: DateTime!
+  occurrences: Int!
+  handledBy: String
+  acknowledgedAt: DateTime
+  resolvedAt: DateTime
+  comment: String
+}
+
+type AlertPage {
+  content: [Alert!]!
+  page: Int!
+  size: Int!
+  totalElements: Int!
+  totalPages: Int!
+}

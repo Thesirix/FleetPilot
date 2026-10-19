@@ -1,0 +1,313 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">FleetPilot</string>
+    <string name="app_subtitle">Application conducteur</string>
+
+    <!-- Sign-in -->
+    <string name="login_title">Votre véhicule de fonction, dans la poche</string>
+    <string name="login_text">Kilométrage, pleins, état des lieux, sinistres avec photos et garages agréés : tout ce que votre gestionnaire de flotte vous demande, même sans réseau.</string>
+    <string name="login_button">Se connecter</string>
+    <string name="login_hint">Avec le compte FleetPilot donné par votre entreprise.</string>
+    <string name="login_failed">Connexion impossible : vérifiez le réseau et réessayez.</string>
+    <string name="login_server">Serveur : %1$s</string>
+
+    <!-- Navigation -->
+    <string name="tab_home">Accueil</string>
+    <string name="tab_fuel">Plein</string>
+    <string name="tab_inspection">État des lieux</string>
+    <string name="tab_incident">Sinistre</string>
+    <string name="tab_garages">Garages</string>
+    <string name="menu_notifications">Notifications</string>
+    <string name="menu_profile">Mon profil</string>
+    <string name="back">Retour</string>
+    <string name="offline_banner">Hors connexion : vos saisies restent sur le téléphone et partiront au retour du réseau.</string>
+    <string name="stale_banner">Données de votre dernière connexion.</string>
+    <string name="retry">Réessayer</string>
+    <string name="cancel">Annuler</string>
+    <string name="save">Enregistrer</string>
+    <string name="loading">Chargement…</string>
+    <string name="error_generic">Impossible de charger les données.</string>
+
+    <!-- Home -->
+    <string name="hello">Bonjour %1$s</string>
+    <string name="hello_subtitle">Votre véhicule et vos démarches</string>
+    <string name="my_vehicle">Mon véhicule</string>
+    <string name="no_vehicle">Aucun véhicule ne vous est affecté pour le moment.</string>
+    <string name="mileage">Kilométrage</string>
+    <string name="energy">Énergie</string>
+    <string name="site">Site</string>
+    <string name="report_mileage">Déclarer mon kilométrage</string>
+    <string name="new_mileage">Nouveau kilométrage</string>
+    <string name="mileage_recorded">Kilométrage enregistré</string>
+    <string name="vehicle_details">Voir la fiche du véhicule</string>
+    <string name="quick_fuel">Saisir un plein</string>
+    <string name="quick_fuel_hint">Carburant ou recharge</string>
+    <string name="quick_inspection">État des lieux</string>
+    <string name="quick_inspection_hint">Prise, restitution, mensuel</string>
+    <string name="quick_incident">Déclarer un sinistre</string>
+    <string name="quick_incident_hint">Avec photos et position</string>
+    <string name="quick_garages">Garages proches</string>
+    <string name="quick_garages_hint">Agréés par votre gestionnaire</string>
+    <string name="next_deadlines">Prochaines échéances</string>
+    <string name="no_deadline">Aucune échéance pour votre véhicule.</string>
+    <string name="my_incidents">Mes sinistres</string>
+    <string name="no_incident">Vous n\'avez déclaré aucun sinistre.</string>
+    <string name="notifications_preview">Notifications</string>
+    <string name="see_all">Tout voir</string>
+
+    <!-- Outbox -->
+    <string name="outbox_title">En attente d\'envoi</string>
+    <string name="outbox_waiting">Gardé sur le téléphone depuis le %1$s</string>
+    <string name="outbox_photos">photos envoyées : %1$d sur %2$d</string>
+    <string name="outbox_queued">Enregistré sur le téléphone : l\'envoi se fera dès le retour du réseau.</string>
+    <string name="outbox_discard">Retirer</string>
+    <string name="outbox_pending_badge">En attente</string>
+    <string name="outbox_mileage">Kilométrage : %1$s</string>
+    <string name="outbox_fuel">Plein du %1$s : %2$s %3$s</string>
+    <plurals name="outbox_inspection">
+        <item quantity="one">État des lieux (%1$s), %2$d défaut</item>
+        <item quantity="many">État des lieux (%1$s), %2$d défauts</item>
+        <item quantity="other">État des lieux (%1$s), %2$d défauts</item>
+    </plurals>
+    <string name="outbox_incident">Sinistre : %1$s du %2$s</string>
+
+    <!-- Fuel -->
+    <string name="fuel_title">Saisir un plein</string>
+    <string name="fuel_subtitle">Recopiez le ticket : le gestionnaire le rapproche des relevés de la carte carburant.</string>
+    <string name="fuel_quantity">Quantité (%1$s)</string>
+    <string name="fuel_amount">Montant TTC (€)</string>
+    <string name="fuel_unit_price">Soit %1$s € par %2$s</string>
+    <string name="fuel_implausible">%1$s € par %2$s : vérifiez la quantité et le montant</string>
+    <string name="fuel_station">Station</string>
+    <string name="fuel_station_hint">Ex. TotalEnergies Marseille Prado</string>
+    <string name="fuel_payment">Paiement</string>
+    <string name="fuel_personal_hint">Gardez le ticket : il sera demandé avec votre note de frais.</string>
+    <string name="fuel_save">Enregistrer le plein</string>
+    <string name="fuel_saved">Plein enregistré</string>
+    <string name="fuel_history">Mes derniers pleins</string>
+    <string name="fuel_none">Aucun plein saisi pour le moment.</string>
+    <string name="fuel_no_station">Station non précisée</string>
+    <string name="unit_litre">L</string>
+    <string name="unit_kwh">kWh</string>
+
+    <!-- Inspection -->
+    <string name="inspection_title">État des lieux</string>
+    <string name="inspection_subtitle">Faites le tour du véhicule : chaque point abîmé ou manquant est signalé à votre gestionnaire.</string>
+    <string name="inspection_level_fuel">Niveau de carburant : %1$d %%</string>
+    <string name="inspection_level_battery">Niveau de batterie : %1$d %%</string>
+    <string name="inspection_checklist">Points de contrôle</string>
+    <string name="inspection_what_is_wrong">Qu\'est-ce qui ne va pas ?</string>
+    <string name="inspection_comment_required">Précisez ce qui ne va pas pour chaque point abîmé ou manquant.</string>
+    <string name="inspection_remarks">Remarques</string>
+    <string name="inspection_save">Enregistrer l\'état des lieux</string>
+    <string name="inspection_saved">État des lieux enregistré</string>
+    <string name="inspection_history">Mes derniers états des lieux</string>
+    <string name="inspection_none">Aucun état des lieux pour le moment.</string>
+    <plurals name="inspection_defects">
+        <item quantity="one">%d défaut</item>
+        <item quantity="other">%d défauts</item>
+    </plurals>
+    <string name="inspection_no_defect">Aucun défaut</string>
+
+    <!-- Photos -->
+    <string name="photos_title">Photos</string>
+    <string name="photos_take">Prendre</string>
+    <string name="photos_pick">Galerie</string>
+    <string name="photos_count">%1$d sur %2$d, réduites avant l\'envoi.</string>
+    <string name="photos_remove">Retirer la photo</string>
+    <string name="photos_failed">Photo illisible.</string>
+
+    <!-- Incident -->
+    <string name="incident_title">Déclarer un sinistre</string>
+    <string name="incident_subtitle">Votre gestionnaire et l\'assureur reçoivent la déclaration et vos photos.</string>
+    <string name="incident_emergency">Un blessé ? Appelez le 112</string>
+    <string name="incident_emergency_hint">Mettez-vous en sécurité avant de remplir la déclaration.</string>
+    <string name="incident_type">Type de sinistre</string>
+    <string name="incident_where">Lieu</string>
+    <string name="incident_where_hint">Adresse, ville ou lieu-dit</string>
+    <string name="incident_use_gps">Utiliser ma position</string>
+    <string name="incident_gps_location">Position GPS %1$s, %2$s</string>
+    <string name="incident_gps_saved">Position GPS jointe à la déclaration.</string>
+    <string name="incident_gps_refused">Position indisponible : saisissez le lieu.</string>
+    <string name="incident_what">Circonstances</string>
+    <string name="incident_what_hint">Circonstances, dégâts constatés, tiers impliqué…</string>
+    <string name="incident_third_party">Tiers impliqué</string>
+    <string name="incident_injuries">Blessés</string>
+    <string name="incident_send">Envoyer la déclaration</string>
+    <string name="incident_declared">Sinistre déclaré</string>
+
+    <!-- Garages -->
+    <string name="garages_title">Garages proches</string>
+    <string name="garages_subtitle">Garages agréés par votre gestionnaire de flotte, du plus proche au plus éloigné.</string>
+    <string name="garages_around_me">Autour de moi</string>
+    <string name="garages_locating">Localisation…</string>
+    <string name="garages_permission">Autorisez la position pour trouver les garages autour de vous.</string>
+    <plurals name="garages_found">
+        <item quantity="one">%1$d garage agréé à moins de %2$d km</item>
+        <item quantity="many">%1$d garages agréés à moins de %2$d km</item>
+        <item quantity="other">%1$d garages agréés à moins de %2$d km</item>
+    </plurals>
+    <string name="garages_none">Aucun garage agréé dans ce rayon.</string>
+    <string name="garages_rate">%1$s / h</string>
+    <string name="garages_call">Appeler</string>
+    <string name="garages_go">Itinéraire</string>
+
+    <!-- Notifications -->
+    <string name="notifications_title">Notifications</string>
+    <string name="notifications_subtitle">Échéances de votre véhicule, alertes de son boîtier et suivi de vos sinistres.</string>
+    <string name="notifications_none">Rien à signaler.</string>
+    <string name="notifications_enable">Activer les notifications</string>
+    <string name="notification_overdue">En retard depuis le %1$s</string>
+    <string name="notification_due_soon">À faire avant le %1$s</string>
+    <string name="notification_incident">Sinistre %1$s</string>
+    <string name="notification_incident_status">Nouveau statut : %1$s</string>
+    <string name="channel_urgent">Alertes urgentes</string>
+    <string name="channel_urgent_description">Échéances dépassées et défauts graves du véhicule</string>
+    <string name="channel_info">Informations</string>
+    <string name="channel_info_description">Échéances à venir et suivi des sinistres</string>
+    <string name="level_CRITICAL">Urgent</string>
+    <string name="level_WARNING">À prévoir</string>
+    <string name="level_INFO">Info</string>
+
+    <!-- Vehicle -->
+    <string name="vehicle_title">Fiche du véhicule</string>
+    <string name="vehicle_model_line">%1$s %2$s</string>
+    <string name="vehicle_vin">Numéro de série (VIN)</string>
+    <string name="vehicle_first_registration">Première immatriculation</string>
+    <string name="vehicle_co2">Émissions de CO2</string>
+    <string name="vehicle_co2_value">%1$d g/km</string>
+    <string name="vehicle_critair">Vignette Crit\'Air</string>
+    <string name="vehicle_company">Entreprise</string>
+    <string name="vehicle_contract">Contrat de location</string>
+    <string name="vehicle_lessor">Loueur</string>
+    <string name="vehicle_contract_number">Numéro de contrat</string>
+    <string name="vehicle_contract_end">Fin de contrat</string>
+    <string name="vehicle_contract_mileage">Kilométrage prévu</string>
+    <string name="vehicle_services">Prestations incluses</string>
+    <string name="vehicle_maintenance">Entretien</string>
+    <string name="vehicle_tyres">Pneus</string>
+    <string name="vehicle_replacement">Véhicule de remplacement</string>
+    <string name="vehicle_no_contract">Véhicule sans contrat de location.</string>
+    <string name="vehicle_owned">Véhicule détenu en propre par votre entreprise : pas de contrat de location.</string>
+    <string name="critair_electric">Électrique (E)</string>
+
+    <!-- Profile -->
+    <string name="profile_title">Mon profil</string>
+    <string name="profile_employee">Matricule</string>
+    <string name="profile_email">E-mail</string>
+    <string name="profile_phone">Téléphone</string>
+    <string name="profile_license">Mon permis</string>
+    <string name="profile_license_categories">Catégories</string>
+    <string name="profile_license_expires">Valable jusqu\'au</string>
+    <string name="profile_driven">Kilomètres parcourus avec mes véhicules</string>
+    <string name="profile_logout">Se déconnecter</string>
+    <string name="profile_version">Version %1$s</string>
+
+    <!-- Labels of the API codes -->
+    <string name="energy_DIESEL">Diesel</string>
+    <string name="energy_PETROL">Essence</string>
+    <string name="energy_HYBRID">Hybride</string>
+    <string name="energy_PLUG_IN_HYBRID">Hybride rechargeable</string>
+    <string name="energy_ELECTRIC">Électrique</string>
+    <string name="energy_LPG">GPL</string>
+    <string name="energy_CNG">GNV</string>
+    <string name="energy_HYDROGEN">Hydrogène</string>
+    <string name="deadline_TECHNICAL_INSPECTION">Contrôle technique</string>
+    <string name="deadline_SERVICE">Révision</string>
+    <string name="deadline_TYRES">Pneus</string>
+    <string name="deadline_TACHOGRAPH">Chronotachygraphe</string>
+    <string name="deadline_CONTRACT_END">Fin de contrat</string>
+    <string name="urgency_OVERDUE">En retard</string>
+    <string name="urgency_DUE_SOON">À venir</string>
+    <string name="urgency_UPCOMING">Planifiée</string>
+    <string name="alert_SPEEDING">Excès de vitesse</string>
+    <string name="alert_LONG_IDLE">Ralenti prolongé</string>
+    <string name="alert_LOW_BATTERY">Batterie faible</string>
+    <string name="alert_ENGINE_FAULT">Défaut grave</string>
+    <string name="alert_ENGINE_WARNING">Défaut à surveiller</string>
+    <string name="alert_SERVICE_DUE">Révision proche</string>
+    <string name="incident_type_COLLISION">Collision</string>
+    <string name="incident_type_GLASS_BREAKAGE">Bris de glace</string>
+    <string name="incident_type_MECHANICAL_FAILURE">Panne mécanique</string>
+    <string name="incident_type_VANDALISM">Vandalisme</string>
+    <string name="incident_type_WEATHER">Événement climatique</string>
+    <string name="incident_type_THEFT">Vol</string>
+    <string name="incident_type_FIRE">Incendie</string>
+    <string name="incident_status_DECLARED">Déclaré</string>
+    <string name="incident_status_UNDER_REVIEW">En expertise</string>
+    <string name="incident_status_IN_REPAIR">En réparation</string>
+    <string name="incident_status_CLOSED">Clôturé</string>
+    <string name="incident_status_REJECTED">Refusé</string>
+    <string name="fuel_kind_FUEL">Carburant</string>
+    <string name="fuel_kind_CHARGE">Recharge</string>
+    <string name="payment_FUEL_CARD">Carte carburant</string>
+    <string name="payment_PERSONAL">Mes frais</string>
+    <string name="inspection_kind_PICKUP">Prise</string>
+    <string name="inspection_kind_RETURN">Restitution</string>
+    <string name="inspection_kind_PERIODIC">Mensuel</string>
+    <string name="item_BODYWORK">Carrosserie</string>
+    <string name="item_WINDSCREEN">Pare-brise</string>
+    <string name="item_TYRES">Pneus</string>
+    <string name="item_LIGHTS">Éclairage</string>
+    <string name="item_INTERIOR">Intérieur</string>
+    <string name="item_CLEANLINESS">Propreté</string>
+    <string name="item_SAFETY_KIT">Gilet et triangle</string>
+    <string name="item_DOCUMENTS">Papiers du véhicule</string>
+    <string name="condition_OK">OK</string>
+    <string name="condition_DAMAGED">Abîmé</string>
+    <string name="condition_MISSING">Manquant</string>
+    <string name="network_DEALER">Concession</string>
+    <string name="network_INDEPENDENT">Indépendant</string>
+    <string name="network_FAST_FIT">Centre auto</string>
+    <string name="network_BODYWORK">Carrosserie</string>
+    <string name="network_TRUCK">Poids lourds</string>
+
+    <!-- Errors of the API (stable codes) -->
+    <string name="error_NETWORK_ERROR">Réseau indisponible.</string>
+    <string name="error_NO_VEHICLE_ASSIGNED">Aucun véhicule ne vous est affecté.</string>
+    <string name="error_MILEAGE_DECREASE">Le kilométrage ne peut pas être inférieur au dernier relevé.</string>
+    <string name="error_FILL_UP_IN_FUTURE">La date du plein est dans le futur.</string>
+    <string name="error_FILL_UP_TOO_OLD">Un plein de plus de 90 jours ne peut plus être saisi.</string>
+    <string name="error_WRONG_ENERGY">Ce type de plein ne correspond pas à l\'énergie du véhicule.</string>
+    <string name="error_IMPLAUSIBLE_PRICE">Le prix au litre ou au kWh n\'est pas plausible : vérifiez la quantité et le montant.</string>
+    <string name="error_INSPECTION_DATE">Un état des lieux se saisit dans les 7 jours, jamais à l\'avance.</string>
+    <string name="error_CHECKLIST_INCOMPLETE">Tous les points de contrôle doivent être renseignés.</string>
+    <string name="error_DEFECT_WITHOUT_COMMENT">Précisez ce qui ne va pas pour chaque point abîmé ou manquant.</string>
+    <string name="error_PHOTO_FORMAT">Une photo doit être en JPEG, PNG ou WebP.</string>
+    <string name="error_PHOTO_SIZE">Une photo pèse au plus 2 Mo.</string>
+    <string name="error_TOO_MANY_PHOTOS">10 photos au plus par déclaration.</string>
+    <string name="error_VALIDATION_FAILED">Certaines informations ne sont pas valides.</string>
+    <string name="error_ID_ALREADY_USED">Cette saisie a déjà été enregistrée avec un autre contenu.</string>
+    <string name="error_INVALID_RECEIPT">La quantité doit être positive et le montant ne peut pas être négatif.</string>
+    <string name="error_INCIDENT_IN_FUTURE">La date du sinistre est dans le futur.</string>
+    <string name="error_FUEL_LEVEL">Le niveau de carburant ou de batterie est un pourcentage (0 à 100).</string>
+    <string name="error_CHECKLIST_DUPLICATE">Un point de contrôle est renseigné deux fois.</string>
+    <string name="error_VEHICLE_DISPOSED">Ce véhicule a quitté la flotte.</string>
+    <string name="error_DRIVER_INACTIVE">Votre compte conducteur est désactivé : contactez votre gestionnaire.</string>
+    <string name="error_MALFORMED_REQUEST">La saisie n\'a pas pu être lue par le serveur.</string>
+    <string name="error_STALE_VERSION">Ces données ont changé entre-temps : rechargez et recommencez.</string>
+    <string name="error_DATA_CONFLICT">Cette saisie entre en conflit avec une donnée existante.</string>
+    <string name="error_UNAUTHORIZED">Votre session a expiré : reconnectez-vous.</string>
+    <string name="error_ACCESS_DENIED">Vous n\'avez pas accès à cette information.</string>
+    <string name="error_INTERNAL_ERROR">Le service a rencontré une erreur : réessayez plus tard.</string>
+    <string name="error_server_unavailable">Service momentanément indisponible : réessayez plus tard.</string>
+    <string name="error_refused">La demande a été refusée par le serveur.</string>
+    <string name="next_deadline">Prochaine échéance</string>
+    <string name="contract_of">Contrat %1$s</string>
+    <string name="contract_use">%1$s sur %2$s</string>
+    <string name="month_km">%1$s parcourus ces 30 derniers jours</string>
+    <string name="deadline_today">Aujourd\'hui</string>
+    <plurals name="deadline_in_days">
+        <item quantity="one">Dans %d jour</item>
+        <item quantity="many">Dans %d jours</item>
+        <item quantity="other">Dans %d jours</item>
+    </plurals>
+    <plurals name="deadline_late_days">
+        <item quantity="one">%d jour de retard</item>
+        <item quantity="many">%d jours de retard</item>
+        <item quantity="other">%d jours de retard</item>
+    </plurals>
+    <string name="deadline_in_km">Dans %1$s</string>
+    <string name="deadline_late_km">Dépassée de %1$s</string>
+    <string name="critair_label">Crit\'Air %1$s</string>
+</resources>

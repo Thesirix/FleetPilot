@@ -1,0 +1,77 @@
+{
+  "index_patterns": [
+    "fleet-fuel"
+  ],
+  "priority": 200,
+  "template": {
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 0
+    },
+    "mappings": {
+      "dynamic": "false",
+      "properties": {
+        "transactionId": {
+          "type": "keyword"
+        },
+        "provider": {
+          "type": "keyword"
+        },
+        "vehicleId": {
+          "type": "keyword"
+        },
+        "companyId": {
+          "type": "keyword"
+        },
+        "companyName": {
+          "type": "keyword"
+        },
+        "registration": {
+          "type": "keyword"
+        },
+        "category": {
+          "type": "keyword"
+        },
+        "energy": {
+          "type": "keyword"
+        },
+        "at": {
+          "type": "date"
+        },
+        "station": {
+          "type": "keyword"
+        },
+        "city": {
+          "type": "keyword"
+        },
+        "product": {
+          "type": "keyword"
+        },
+        "litres": {
+          "type": "float"
+        },
+        "amount": {
+          "type": "float"
+        },
+        "unitPrice": {
+          "type": "float"
+        },
+        "odometer": {
+          "type": "integer"
+        },
+        "distanceSincePreviousKm": {
+          "type": "integer"
+        },
+        "consumptionL100": {
+          "type": "float"
+        },
+        "anomalies": {
+          "type": "keyword"
+        }
+      }
+    }
+  },
+  "_meta": {
+    "description": "FleetPilot analytics: fleet-fuel"
+  }
+}

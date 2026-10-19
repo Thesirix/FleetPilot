@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{mail/layout :: email(~{::title}, ~{::section})}" lang="fr">
+<head><title th:text="|Votre déclaration de sinistre ${reference} est enregistrée|">Sinistre enregistré</title></head>
+<body>
+<section>
+  <p style="margin:0 0 14px;">Bonjour<span th:if="${recipientName}" th:text="| ${recipientName}|"></span>,</p>
+  <p style="margin:0 0 14px;">
+    Votre déclaration de sinistre sur le véhicule <strong th:text="${registration}">AB-123-CD</strong> est enregistrée
+    sous la référence <strong th:text="${reference}">SIN</strong>. Le gestionnaire de flotte l'instruit avec l'assureur
+    et vous recontacte si nécessaire.
+  </p>
+  <p th:replace="~{mail/fragments :: note('Conservez le constat amiable et les photos : ils peuvent vous être demandés.')}"></p>
+  <a th:replace="~{mail/fragments :: button(${portalUrl + '/conducteur'}, 'Suivre ma déclaration')}"></a>
+</section>
+</body>
+</html>

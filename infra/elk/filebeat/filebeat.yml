@@ -1,0 +1,40 @@
+# Collects the logs of every container of the Compose project (except the log stack itself) and sends them to
+# Logstash. Docker writes each container's output to /var/lib/docker/containers/<id>/<id>-json.log; the Docker
+# metadata (name, Compose service) comes from the Docker socket.
+filebeat.inputs:
+  - type: filestream
+    id: docker-containers
+    paths:
+      - /var/lib/docker/containers/*/*-json.log
+    parsers:
+      - container: ~
+    prospector.scanner.check_interval: 5s
+
+processors:
+  - add_docker_metadata:
+      host: "unix:///var/run/docker.sock"
+  # Filebeat writes the dots of the Docker labels as underscores (com.docker.compose.project)
+  - drop_event:
+      when:
+        or:
+          - not:
+              equals:
+                container.labels.com_docker_compose_project: fleetpilot
+          - equals:
+              container.labels.com_docker_compose_service: elasticsearch
+          - equals:
+              container.labels.com_docker_compose_service: logstash
+          - equals:
+              container.labels.com_docker_compose_service: kibana
+          - equals:
+              container.labels.com_docker_compose_service: filebeat
+          - equals:
+              container.labels.com_docker_compose_service: kibana-setup
+  - drop_fields:
+      fields: ["host", "agent.ephemeral_id", "agent.id", "log.offset"]
+      ignore_missing: true
+
+output.logstash:
+  hosts: ["logstash:5044"]
+
+logging.level: warning

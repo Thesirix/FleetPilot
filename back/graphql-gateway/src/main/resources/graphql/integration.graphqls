@@ -1,0 +1,149 @@
+# Integration bus (integration-esb): the partner flows, the journal of the exchanges, and the fuel card transactions.
+# A file is dropped with REST (multipart POST /api/v1/integration/inbox/{flow}), as a partner would.
+
+enum Flow { GARAGE_QUOTES LESSOR_INVOICES FUEL_CARDS INSURER_CLAIMS }
+enum ExchangeStatus { RUNNING PROCESSED PARTIAL REJECTED DUPLICATE FAILED }
+enum IssueSeverity { ERROR WARNING }
+
+extend type Query {
+  "Staff: the partner flows, their Camel routes and their activity over 30 days."
+  integrationFlows: [IntegrationFlow!]!
+  "Staff: journal of the exchanges with the partners, most recent first."
+  exchanges(flow: Flow, status: ExchangeStatus, page: Int = 0, size: Int = 25): ExchangePage!
+  "Staff: an exchange, with the file as received and the issues found line by line."
+  exchange(id: ID!): ExchangeDetail
+  "Fuel card transactions, most recent first."
+  fuelTransactions(filter: FuelFilter, page: Int = 0, size: Int = 25): FuelTransactionPage!
+  "Fuel spending and anomalies (last three months by default)."
+  fuelSummary(companyId: ID, from: Date, to: Date): FuelSummary!
+}
+
+extend type Mutation {
+  "Staff: put a failed, rejected or partially accepted file back into its inbox."
+  replayExchange(id: ID!): ReplayResult!
+}
+
+type CamelRoute {
+  id: String!
+  description: String
+  "Started, Stopped..."
+  status: String!
+  endpoint: String
+}
+
+type FlowActivity {
+  exchanges: Int!
+  processed: Int!
+  partial: Int!
+  rejected: Int!
+  failed: Int!
+  duplicates: Int!
+  records: Int!
+  lastReceivedAt: DateTime
+}
+
+type IntegrationFlow {
+  flow: Flow!
+  "Folder of the inbox, for the flows that receive files."
+  folder: String
+  routes: [CamelRoute!]!
+  activity: FlowActivity!
+}
+
+type Exchange {
+  id: ID!
+  flow: Flow!
+  partner: String
+  source: String!
+  receivedAt: DateTime!
+  completedAt: DateTime
+  status: ExchangeStatus!
+  records: Int!
+  accepted: Int!
+  rejected: Int!
+  summary: String
+  resultRef: String
+  replayOf: ID
+}
+
+type ExchangeIssue {
+  line: Int
+  reference: String
+  severity: IssueSeverity!
+  code: String!
+  message: String!
+}
+
+type ExchangeDetail {
+  summary: Exchange!
+  contentType: String
+  payload: String
+  issues: [ExchangeIssue!]!
+}
+
+type ExchangePage {
+  content: [Exchange!]!
+  page: Int!
+  size: Int!
+  totalElements: Int!
+  totalPages: Int!
+}
+
+type ReplayResult {
+  fileName: String!
+  message: String!
+}
+
+input FuelFilter {
+  companyId: ID
+  vehicleId: ID
+  "WRONG_FUEL, OVER_CAPACITY, TOO_FREQUENT, ODOMETER, UNKNOWN_VEHICLE"
+  anomaly: String
+  onlyAnomalies: Boolean
+  "Registration or station."
+  q: String
+}
+
+type FuelTransaction {
+  id: ID!
+  provider: String!
+  reference: String!
+  card: String!
+  occurredAt: DateTime!
+  station: String!
+  city: String
+  product: String!
+  litres: Float!
+  unitPrice: Float!
+  amount: Float!
+  odometer: Int
+  registration: String!
+  vehicleId: ID
+  companyId: ID
+  energy: String
+  anomalies: [String!]!
+}
+
+type FuelTransactionPage {
+  content: [FuelTransaction!]!
+  page: Int!
+  size: Int!
+  totalElements: Int!
+  totalPages: Int!
+}
+
+type FuelMonth { month: String! amount: Float! litres: Float! }
+
+type FuelSummary {
+  from: Date!
+  to: Date!
+  transactions: Int!
+  amount: Float!
+  litres: Float!
+  averagePrice: Float!
+  withAnomaly: Int!
+  amountWithAnomaly: Float!
+  "Most frequent first."
+  anomaliesByType: [Count!]!
+  months: [FuelMonth!]!
+}

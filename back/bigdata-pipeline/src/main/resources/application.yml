@@ -1,0 +1,84 @@
+server:
+  port: 8089
+  shutdown: graceful
+
+spring:
+  application:
+    name: bigdata-pipeline
+  threads:
+    virtual:
+      enabled: true
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9094}
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+    consumer:
+      auto-offset-reset: earliest
+      max-poll-records: 1000
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    # Kafka Streams: the connection comes from spring.kafka (or the service connection of the tests)
+    streams:
+      application-id: fleetpilot-analytics
+      state-dir: ${STREAMS_STATE_DIR:${java.io.tmpdir}/fleetpilot-streams}
+      properties:
+        num.stream.threads: 2
+        # the aggregates are sent at every commit, the record cache keeping only the last state of each key
+        commit.interval.ms: 5000
+        default.key.serde: org.apache.kafka.common.serialization.Serdes$StringSerde
+        default.value.serde: org.apache.kafka.common.serialization.Serdes$StringSerde
+        # the first start processes what Kafka still keeps of the last days
+        consumer.auto.offset.reset: earliest
+  elasticsearch:
+    uris: ${ELASTICSEARCH_URL:http://localhost:9200}
+    connection-timeout: 5s
+    socket-timeout: 60s
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${OIDC_ISSUER_URI:http://localhost:8180/realms/fleetpilot}
+          jwk-set-uri: ${OIDC_JWK_SET_URI:http://localhost:8180/realms/fleetpilot/protocol/openid-connect/certs}
+          audiences: fleetpilot-api
+      # The pipeline reads the fleet and the history as itself (client_credentials)
+      client:
+        registration:
+          fleetpilot-services:
+            provider: keycloak
+            client-id: fleetpilot-services
+            client-secret: ${SERVICES_CLIENT_SECRET:dev-fleetpilot-services-secret}
+            authorization-grant-type: client_credentials
+            scope: openid
+        provider:
+          keycloak:
+            token-uri: ${OIDC_TOKEN_URI:http://localhost:8180/realms/fleetpilot/protocol/openid-connect/token}
+
+fleetpilot:
+  services:
+    vehicle-url: ${VEHICLE_SERVICE_URL:http://localhost:8081}
+    telemetry-url: ${TELEMETRY_SERVICE_URL:http://localhost:8086}
+  analytics:
+    # Interval of the positions of a moving vehicle, as sent by the boxes
+    report-seconds: 2
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      probes:
+        enabled: true
+      show-details: always
+
+info:
+  app:
+    name: FleetPilot bigdata-pipeline
+    description: Kafka Streams analytics indexed into Elasticsearch
+
+logging:
+  level:
+    com.fleetpilot: INFO
+    org.apache.kafka: WARN

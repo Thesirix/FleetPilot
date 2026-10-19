@@ -1,0 +1,9 @@
+# Build context of the web portal image (front/Dockerfile): only the front sources and the Nginx configuration.
+**/node_modules
+**/.nuxt
+**/.output
+back
+mobile
+assets
+tools
+**/target

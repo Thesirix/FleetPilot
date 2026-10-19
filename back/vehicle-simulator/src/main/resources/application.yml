@@ -1,0 +1,62 @@
+server:
+  port: 8087
+  shutdown: graceful
+
+spring:
+  application:
+    name: vehicle-simulator
+  threads:
+    virtual:
+      enabled: true
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${OIDC_ISSUER_URI:http://localhost:8180/realms/fleetpilot}
+          jwk-set-uri: ${OIDC_JWK_SET_URI:http://localhost:8180/realms/fleetpilot/protocol/openid-connect/certs}
+          audiences: fleetpilot-api
+      client:
+        registration:
+          fleetpilot-services:
+            provider: keycloak
+            client-id: fleetpilot-services
+            client-secret: ${SERVICES_CLIENT_SECRET:dev-fleetpilot-services-secret}
+            authorization-grant-type: client_credentials
+            scope: openid
+        provider:
+          keycloak:
+            token-uri: ${OIDC_TOKEN_URI:http://localhost:8180/realms/fleetpilot/protocol/openid-connect/token}
+  kafka:
+    bootstrap-servers: ${KAFKA_BOOTSTRAP_SERVERS:localhost:9094}
+    producer:
+      # Telemetry favours throughput: a lost position is replaced by the next one two seconds later
+      acks: 1
+      linger-ms: 20
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      compression-type: lz4
+
+fleetpilot:
+  services:
+    vehicle-url: ${VEHICLE_SERVICE_URL:http://localhost:8081}
+  simulator:
+    enabled: ${SIMULATOR_ENABLED:true}
+    # Number of connected vehicles, chosen evenly in the fleet
+    vehicles: ${SIMULATOR_VEHICLES:160}
+    # Milliseconds between two positions of a moving vehicle
+    tick: 2000
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+logging:
+  level:
+    com.fleetpilot: INFO
+    org.apache.kafka: WARN

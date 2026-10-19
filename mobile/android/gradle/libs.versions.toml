@@ -1,0 +1,60 @@
+[versions]
+agp = "9.4.1"
+appcompat = "1.8.0"
+material = "1.14.0"
+constraintlayout = "2.2.2"
+recyclerview = "1.4.0"
+swiperefreshlayout = "1.2.0"
+lifecycle = "2.11.0"
+fragment = "1.9.1"
+activity = "1.13.0"
+room = "2.8.5"
+work = "2.12.0"
+retrofit = "3.0.0"
+gson = "2.14.0"
+appauth = "0.11.1"
+browser = "1.10.0"
+exifinterface = "1.4.2"
+osmdroid = "6.1.20"
+junit = "4.13.2"
+androidxJunit = "1.3.0"
+testRunner = "1.7.0"
+testRules = "1.7.0"
+espresso = "3.7.0"
+coreTesting = "2.2.0"
+uiautomator = "2.3.0"
+
+[libraries]
+appcompat = { module = "androidx.appcompat:appcompat", version.ref = "appcompat" }
+material = { module = "com.google.android.material:material", version.ref = "material" }
+constraintlayout = { module = "androidx.constraintlayout:constraintlayout", version.ref = "constraintlayout" }
+recyclerview = { module = "androidx.recyclerview:recyclerview", version.ref = "recyclerview" }
+swiperefreshlayout = { module = "androidx.swiperefreshlayout:swiperefreshlayout", version.ref = "swiperefreshlayout" }
+lifecycle-viewmodel = { module = "androidx.lifecycle:lifecycle-viewmodel", version.ref = "lifecycle" }
+lifecycle-livedata = { module = "androidx.lifecycle:lifecycle-livedata", version.ref = "lifecycle" }
+fragment = { module = "androidx.fragment:fragment", version.ref = "fragment" }
+fragment-testing = { module = "androidx.fragment:fragment-testing", version.ref = "fragment" }
+fragment-testing-manifest = { module = "androidx.fragment:fragment-testing-manifest", version.ref = "fragment" }
+activity = { module = "androidx.activity:activity", version.ref = "activity" }
+room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
+room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
+work-runtime = { module = "androidx.work:work-runtime", version.ref = "work" }
+work-testing = { module = "androidx.work:work-testing", version.ref = "work" }
+retrofit = { module = "com.squareup.retrofit2:retrofit", version.ref = "retrofit" }
+retrofit-gson = { module = "com.squareup.retrofit2:converter-gson", version.ref = "retrofit" }
+gson = { module = "com.google.code.gson:gson", version.ref = "gson" }
+appauth = { module = "net.openid:appauth", version.ref = "appauth" }
+browser = { module = "androidx.browser:browser", version.ref = "browser" }
+exifinterface = { module = "androidx.exifinterface:exifinterface", version.ref = "exifinterface" }
+osmdroid = { module = "org.osmdroid:osmdroid-android", version.ref = "osmdroid" }
+junit = { module = "junit:junit", version.ref = "junit" }
+androidx-junit = { module = "androidx.test.ext:junit", version.ref = "androidxJunit" }
+test-runner = { module = "androidx.test:runner", version.ref = "testRunner" }
+test-rules = { module = "androidx.test:rules", version.ref = "testRules" }
+espresso-core = { module = "androidx.test.espresso:espresso-core", version.ref = "espresso" }
+espresso-contrib = { module = "androidx.test.espresso:espresso-contrib", version.ref = "espresso" }
+core-testing = { module = "androidx.arch.core:core-testing", version.ref = "coreTesting" }
+uiautomator = { module = "androidx.test.uiautomator:uiautomator", version.ref = "uiautomator" }
+
+[plugins]
+android-application = { id = "com.android.application", version.ref = "agp" }

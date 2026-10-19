@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{mail/layout :: email(~{::title}, ~{::section})}" lang="fr">
+<head><title th:text="|Contre-proposition sur votre devis ${reference}|">Contre-proposition</title></head>
+<body>
+<section>
+  <p style="margin:0 0 14px;">Bonjour<span th:if="${recipientName}" th:text="| ${recipientName}|"></span>,</p>
+  <p style="margin:0 0 14px;">
+    Votre devis <strong th:text="${reference}">DEV</strong> pour le véhicule
+    <strong th:text="${registration}">AB-123-CD</strong> dépasse le tarif de référence négocié avec votre réseau.
+    Le gestionnaire de flotte vous propose le montant suivant :
+  </p>
+  <table th:replace="~{mail/fragments :: facts(${ { {'Montant de votre devis HT', fmt.money(amount)},
+      {'Montant proposé HT', fmt.money(proposedAmount)} } })}"></table>
+  <p style="margin:0 0 18px;">
+    Vous pouvez accepter cette proposition, la refuser avec un message, ou envoyer une nouvelle version de votre devis.
+    Le détail de la comparaison ligne par ligne est visible dans votre espace garage.
+  </p>
+  <a th:replace="~{mail/fragments :: button(${portalUrl + '/devis/' + quoteId}, 'Répondre à la proposition')}"></a>
+</section>
+</body>
+</html>

@@ -1,0 +1,71 @@
+# Directory of the FleetPilot staff (fleet managers and administrators of the platform).
+# Keycloak federates this directory: staff log in with their directory account, and their LDAP groups become
+# FleetPilot roles. Client users (fleet managers of client companies, drivers) live in Keycloak itself.
+# Every person below is fictitious. Demo password of every account: FleetPilot2026!
+
+dn: ou=people,dc=fleetpilot,dc=dev
+objectClass: organizationalUnit
+ou: people
+
+dn: ou=roles,dc=fleetpilot,dc=dev
+objectClass: organizationalUnit
+ou: roles
+
+dn: uid=theo.lambert,ou=people,dc=fleetpilot,dc=dev
+objectClass: inetOrgPerson
+uid: theo.lambert
+cn:: VGjDqW8gTGFtYmVydA==
+givenName:: VGjDqW8=
+sn: Lambert
+mail: theo.lambert@fleetpilot.dev
+title: Administrateur de la plateforme
+departmentNumber: Plateforme
+userPassword: FleetPilot2026!
+
+dn: uid=claire.morel,ou=people,dc=fleetpilot,dc=dev
+objectClass: inetOrgPerson
+uid: claire.morel
+cn: Claire Morel
+givenName: Claire
+sn: Morel
+mail: claire.morel@fleetpilot.dev
+title: Gestionnaire de flotte, grands comptes
+departmentNumber: Gestion de flotte
+userPassword: FleetPilot2026!
+
+dn: uid=yanis.cherif,ou=people,dc=fleetpilot,dc=dev
+objectClass: inetOrgPerson
+uid: yanis.cherif
+cn: Yanis Cherif
+givenName: Yanis
+sn: Cherif
+mail: yanis.cherif@fleetpilot.dev
+title: Gestionnaire de flotte, secteur public
+departmentNumber: Gestion de flotte
+userPassword: FleetPilot2026!
+
+dn: uid=sophie.garnier,ou=people,dc=fleetpilot,dc=dev
+objectClass: inetOrgPerson
+uid: sophie.garnier
+cn: Sophie Garnier
+givenName: Sophie
+sn: Garnier
+mail: sophie.garnier@fleetpilot.dev
+title:: UmVzcG9uc2FibGUgYWNoYXRzIGV0IG7DqWdvY2lhdGlvbiBnYXJhZ2Vz
+departmentNumber: Gestion de flotte
+userPassword: FleetPilot2026!
+
+dn: cn=platform-admin,ou=roles,dc=fleetpilot,dc=dev
+objectClass: groupOfNames
+cn: platform-admin
+description: Administrateurs de la plateforme FleetPilot
+member: uid=theo.lambert,ou=people,dc=fleetpilot,dc=dev
+
+dn: cn=fleet-manager,ou=roles,dc=fleetpilot,dc=dev
+objectClass: groupOfNames
+cn: fleet-manager
+description:: R2VzdGlvbm5haXJlcyBkZSBmbG90dGUsIGFjY8OocyDDoCB0b3V0ZXMgbGVzIGVudHJlcHJpc2VzIGNsaWVudGVz
+member: uid=claire.morel,ou=people,dc=fleetpilot,dc=dev
+member: uid=yanis.cherif,ou=people,dc=fleetpilot,dc=dev
+member: uid=sophie.garnier,ou=people,dc=fleetpilot,dc=dev
+member: uid=theo.lambert,ou=people,dc=fleetpilot,dc=dev

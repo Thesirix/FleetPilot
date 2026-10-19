@@ -1,0 +1,87 @@
+"""
+FleetPilot GraphQL API, used by the web portal. It aggregates the REST services with the user's own access token:
+every rule (roles, isolation of the client companies) is enforced by the service that owns the data.
+
+Errors carry `extensions.code` (stable, e.g. VEHICLE_NOT_FOUND), `extensions.status` (HTTP status of the service),
+`extensions.fieldErrors` for invalid input and `extensions.correlationId` to find the logs.
+"""
+schema {
+  query: Query
+  mutation: Mutation
+}
+
+"Calendar date, ISO 8601 (2026-10-14)."
+scalar Date
+
+"Instant, ISO 8601 in UTC (2026-10-14T08:00:00Z)."
+scalar DateTime
+
+type Query {
+  "The connected user, as described by their access token."
+  viewer: Viewer!
+
+  "Client companies visible to the user (one for a client manager)."
+  companies: [Company!]!
+  company(id: ID!): Company
+
+  "Dashboard indicators of one company, or of every visible company."
+  fleetSummary(companyId: ID): FleetSummary!
+
+  vehicles(filter: VehicleFilter, page: Int = 0, size: Int = 20, sort: [String!]): VehiclePage!
+  vehicle(id: ID!): Vehicle
+  "Any spelling of a French registration number: gh482km, GH 482 KM, GH-482-KM."
+  vehicleByRegistration(registration: String!): Vehicle
+
+  drivers(filter: DriverFilter, page: Int = 0, size: Int = 20, sort: [String!]): DriverPage!
+  driver(id: ID!): DriverFile
+
+  contracts(filter: ContractFilter, page: Int = 0, size: Int = 20, sort: [String!]): ContractPage!
+  contract(id: ID!): Contract
+  deadlines(filter: DeadlineFilter, page: Int = 0, size: Int = 20, sort: [String!]): DeadlinePage!
+  incidents(filter: IncidentFilter, page: Int = 0, size: Int = 20, sort: [String!]): IncidentPage!
+  incident(id: ID!): Incident
+
+  "The space of the connected driver (driver role only)."
+  mySpace: DriverSpace
+}
+
+type Mutation {
+  createVehicle(input: CreateVehicleInput!): Vehicle!
+  updateVehicle(id: ID!, input: UpdateVehicleInput!): Vehicle!
+  changeVehicleStatus(id: ID!, status: VehicleStatus!): Vehicle!
+  recordMileage(id: ID!, mileage: Int!, readAt: DateTime): Vehicle!
+
+  createDriver(input: CreateDriverInput!): DriverFile!
+  updateDriver(id: ID!, input: UpdateDriverInput!): DriverFile!
+
+  assignVehicle(vehicleId: ID!, driverId: ID!, kind: AssignmentKind, startDate: Date): Assignment!
+  endAssignment(id: ID!, endDate: Date, endMileage: Int): Assignment!
+
+  createContract(vehicleId: ID!, input: CreateContractInput!): Contract!
+  endContract(id: ID!, endedOn: Date): Contract!
+
+  completeDeadline(id: ID!, completedOn: Date, mileage: Int): DeadlineCompletion!
+
+  declareIncident(vehicleId: ID!, input: DeclareIncidentInput!): Incident!
+  assessIncident(id: ID!, responsibility: Responsibility!, estimatedCost: Float): Incident!
+  changeIncidentStatus(id: ID!, status: IncidentStatus!): Incident!
+
+  "Driver role: report the mileage of my vehicle."
+  reportMyMileage(mileage: Int!): Vehicle!
+  "Driver role: declare a claim on my vehicle."
+  declareMyIncident(input: DeclareIncidentInput!): Incident!
+
+  "Administrator: run the daily sweep now (reminders and mileage overrun warnings)."
+  runDailySweep: SweepReport!
+}
+
+type Viewer {
+  username: String!
+  name: String
+  email: String
+  roles: [String!]!
+  "True for the staff of the fleet management company, who see every client company."
+  staff: Boolean!
+  companyId: ID
+  driverId: ID
+}

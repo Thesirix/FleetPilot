@@ -1,0 +1,452 @@
+# Types of the fleet module (vehicle-service).
+
+enum CompanySegment { LARGE_ACCOUNT PUBLIC_SECTOR SME }
+enum VehicleCategory { CAR VAN TRUCK MACHINE }
+enum Energy { PETROL DIESEL HYBRID PLUG_IN_HYBRID ELECTRIC LPG CNG HYDROGEN }
+enum VehicleStatus { AWAITING_DELIVERY ACTIVE IN_REPAIR IMMOBILIZED DISPOSED }
+enum Acquisition { LEASE OWNED }
+enum MileageSource { DRIVER TELEMETRY GARAGE MANAGER IMPORT LESSOR }
+enum LicenseCategory { B BE C1 C CE D }
+enum AssignmentKind { PERMANENT TEMPORARY }
+enum ContractStatus { ACTIVE ENDED }
+enum DeadlineType { TECHNICAL_INSPECTION SERVICE TYRES TACHOGRAPH CONTRACT_END }
+enum DeadlineStatus { OPEN DONE CANCELLED }
+enum Urgency { UPCOMING DUE_SOON OVERDUE }
+enum AlertLevel { D30 D7 OVERDUE }
+enum IncidentType { COLLISION GLASS_BREAKAGE THEFT VANDALISM WEATHER FIRE MECHANICAL_FAILURE }
+enum IncidentStatus { DECLARED UNDER_REVIEW IN_REPAIR CLOSED REJECTED }
+enum Responsibility { UNKNOWN NONE PARTIAL FULL }
+
+# ------------------------------------------------------------------ companies
+
+type Company {
+  id: ID!
+  name: String!
+  legalName: String!
+  siren: String!
+  segment: CompanySegment!
+  city: String!
+  address: String
+  postalCode: String
+  contactName: String
+  contactEmail: String
+  contactPhone: String
+  "A company that left FleetPilot keeps its history; its users can no longer sign in."
+  active: Boolean!
+  version: Int!
+  sites: [Site!]!
+  costCenters: [CostCenter!]!
+}
+
+type Site {
+  id: ID!
+  name: String!
+  address: String
+  postalCode: String
+  city: String!
+  latitude: Float
+  longitude: Float
+}
+
+type CostCenter {
+  id: ID!
+  code: String!
+  label: String!
+}
+
+type CompanyRef { id: ID! name: String! }
+type DriverRef { id: ID! fullName: String! employeeNumber: String! }
+type VehicleRef { id: ID! registration: String! make: String! model: String! }
+
+"A count per value (status, category, energy, Crit'Air sticker), ordered from the most frequent."
+type Count {
+  key: String!
+  count: Int!
+}
+
+type FleetSummary {
+  companyId: ID
+  asOf: Date!
+  inFleet: Int!
+  byStatus: [Count!]!
+  byCategory: [Count!]!
+  byEnergy: [Count!]!
+  byCritAir: [Count!]!
+  averageAgeMonths: Float!
+  averageCo2GramsPerKm: Float!
+  activeDrivers: Int!
+  assignedVehicles: Int!
+  overdueDeadlines: Int!
+  dueSoonDeadlines: Int!
+  contractsEndingSoon: Int!
+  contractsOverrunRisk: Int!
+  monthlyRentTotal: Float!
+  openIncidents: Int!
+  incidentsLast12Months: Int!
+}
+
+# ------------------------------------------------------------------ vehicles
+
+input VehicleFilter {
+  companyId: ID
+  siteId: ID
+  status: VehicleStatus
+  category: VehicleCategory
+  energy: Energy
+  "Registration, VIN, make or model."
+  q: String
+  "With (true) or without (false) a current driver."
+  assigned: Boolean
+}
+
+type VehiclePage {
+  content: [VehicleSummary!]!
+  page: Int!
+  size: Int!
+  totalElements: Int!
+  totalPages: Int!
+}
+
+type VehicleSummary {
+  id: ID!
+  companyId: ID!
+  registration: String!
+  category: VehicleCategory!
+  make: String!
+  model: String!
+  energy: Energy!
+  critAir: Int!
+  mileage: Int!
+  status: VehicleStatus!
+  site: Site
+  costCenter: CostCenter
+  currentDriver: DriverRef
+}
+
+type Vehicle {
+  id: ID!
+  company: CompanyRef!
+  registration: String!
+  vin: String!
+  category: VehicleCategory!
+  make: String!
+  model: String!
+  trimLevel: String
+  energy: Energy!
+  "0 is the green Crit'Air E sticker (electric, hydrogen)."
+  critAir: Int!
+  co2GramsPerKm: Int!
+  fiscalPower: Int
+  firstRegistrationDate: Date!
+  acquisition: Acquisition!
+  mileage: Int!
+  mileageReadAt: DateTime!
+  status: VehicleStatus!
+  allowedTransitions: [VehicleStatus!]!
+  site: Site
+  costCenter: CostCenter
+  currentAssignment: Assignment
+  activeContract: Contract
+  openDeadlines: [Deadline!]!
+  mileageHistory: [MileageReading!]!
+  openIncidents: Int!
+  version: Int!
+  createdAt: DateTime
+  updatedAt: DateTime
+  "Drivers of the vehicle, current and past."
+  assignments: [Assignment!]!
+  "Lease contracts of the vehicle, current and past."
+  contracts: [Contract!]!
+  "Claims of the vehicle, most recent first."
+  incidents: [Incident!]!
+}
+
+type MileageReading {
+  mileage: Int!
+  readAt: DateTime!
+  source: MileageSource!
+}
+
+input CreateVehicleInput {
+  companyId: ID!
+  siteId: ID
+  costCenterId: ID
+  registration: String!
+  vin: String!
+  category: VehicleCategory!
+  make: String!
+  model: String!
+  trimLevel: String
+  energy: Energy!
+  critAir: Int!
+  co2GramsPerKm: Int!
+  fiscalPower: Int
+  firstRegistrationDate: Date!
+  acquisition: Acquisition!
+  mileage: Int!
+  status: VehicleStatus
+}
+
+input UpdateVehicleInput {
+  siteId: ID
+  costCenterId: ID
+  registration: String!
+  category: VehicleCategory!
+  make: String!
+  model: String!
+  trimLevel: String
+  energy: Energy!
+  critAir: Int!
+  co2GramsPerKm: Int!
+  fiscalPower: Int
+  firstRegistrationDate: Date!
+  "The version read before editing (optimistic locking)."
+  version: Int!
+}
+
+# ------------------------------------------------------------------ drivers
+
+input DriverFilter {
+  companyId: ID
+  siteId: ID
+  active: Boolean
+  "Name, e-mail or employee number."
+  q: String
+  "With (true) or without (false) a current vehicle."
+  assigned: Boolean
+}
+
+type DriverPage {
+  content: [DriverSummary!]!
+  page: Int!
+  size: Int!
+  totalElements: Int!
+  totalPages: Int!
+}
+
+type DriverSummary {
+  id: ID!
+  companyId: ID!
+  employeeNumber: String!
+  firstName: String!
+  lastName: String!
+  fullName: String!
+  email: String!
+  phone: String
+  site: Site
+  licenseCategories: [LicenseCategory!]!
+  licenseExpiresOn: Date
+  active: Boolean!
+  currentVehicle: VehicleRef
+}
+
+type DriverFile {
+  driver: DriverSummary!
+  licenseNumber: String!
+  licenseIssuedOn: Date!
+  assignments: [Assignment!]!
+  incidents: [Incident!]!
+  drivenKilometres: Int!
+  version: Int!
+}
+
+type DriverSpace {
+  driver: DriverFile!
+  vehicle: Vehicle
+}
+
+input CreateDriverInput {
+  companyId: ID!
+  siteId: ID
+  employeeNumber: String!
+  firstName: String!
+  lastName: String!
+  email: String!
+  phone: String
+  licenseNumber: String!
+  licenseCategories: [LicenseCategory!]!
+  licenseIssuedOn: Date!
+  licenseExpiresOn: Date
+}
+
+input UpdateDriverInput {
+  siteId: ID
+  employeeNumber: String!
+  firstName: String!
+  lastName: String!
+  email: String!
+  phone: String
+  licenseNumber: String!
+  licenseCategories: [LicenseCategory!]!
+  licenseIssuedOn: Date!
+  licenseExpiresOn: Date
+  active: Boolean!
+  version: Int!
+}
+
+type Assignment {
+  id: ID!
+  vehicle: VehicleRef!
+  driver: DriverRef!
+  kind: AssignmentKind!
+  startDate: Date!
+  endDate: Date
+  startMileage: Int!
+  endMileage: Int
+  drivenKilometres: Int!
+  current: Boolean!
+}
+
+# ------------------------------------------------------------------ contracts
+
+input ContractFilter {
+  companyId: ID
+  lessor: String
+  status: ContractStatus
+  endingBefore: Date
+}
+
+type ContractPage {
+  content: [Contract!]!
+  page: Int!
+  size: Int!
+  totalElements: Int!
+  totalPages: Int!
+}
+
+type Contract {
+  id: ID!
+  vehicle: VehicleRef!
+  lessor: String!
+  contractNumber: String!
+  startDate: Date!
+  endDate: Date!
+  durationMonths: Int!
+  contractualMileage: Int!
+  startMileage: Int!
+  monthlyRent: Float!
+  totalRent: Float!
+  maintenanceIncluded: Boolean!
+  tyresIncluded: Boolean!
+  replacementVehicle: Boolean!
+  status: ContractStatus!
+  endedOn: Date
+  daysRemaining: Int
+  projection: MileageProjection
+}
+
+type MileageProjection {
+  projectedMileage: Int!
+  projectedOverrunKm: Int!
+  dailyAverageKm: Float!
+  overrunRisk: Boolean!
+}
+
+input CreateContractInput {
+  lessor: String!
+  contractNumber: String!
+  startDate: Date!
+  durationMonths: Int!
+  contractualMileage: Int!
+  monthlyRent: Float!
+  maintenanceIncluded: Boolean
+  tyresIncluded: Boolean
+  replacementVehicle: Boolean
+}
+
+# ------------------------------------------------------------------ deadlines
+
+input DeadlineFilter {
+  companyId: ID
+  vehicleId: ID
+  type: DeadlineType
+  urgency: Urgency
+  dueBefore: Date
+}
+
+type DeadlinePage {
+  content: [Deadline!]!
+  page: Int!
+  size: Int!
+  totalElements: Int!
+  totalPages: Int!
+}
+
+type Deadline {
+  id: ID!
+  vehicle: VehicleRef!
+  "Status, site and current driver of the vehicle, loaded in one batch for a whole page (DataLoader)."
+  vehicleSummary: VehicleSummary
+  type: DeadlineType!
+  dueDate: Date
+  dueMileage: Int
+  status: DeadlineStatus!
+  urgency: Urgency
+  daysRemaining: Int
+  kilometresRemaining: Int
+  completedOn: Date
+  completedMileage: Int
+  lastAlert: AlertLevel
+}
+
+type DeadlineCompletion {
+  completed: Deadline!
+  next: Deadline
+}
+
+# ------------------------------------------------------------------ incidents
+
+input IncidentFilter {
+  companyId: ID
+  vehicleId: ID
+  status: IncidentStatus
+  type: IncidentType
+  open: Boolean
+}
+
+type IncidentPage {
+  content: [Incident!]!
+  page: Int!
+  size: Int!
+  totalElements: Int!
+  totalPages: Int!
+}
+
+type Incident {
+  id: ID!
+  reference: String!
+  vehicle: VehicleRef!
+  vehicleSummary: VehicleSummary
+  driver: DriverRef
+  type: IncidentType!
+  occurredAt: DateTime!
+  location: String!
+  latitude: Float
+  longitude: Float
+  description: String!
+  thirdPartyInvolved: Boolean!
+  injuries: Boolean!
+  responsibility: Responsibility!
+  estimatedCost: Float
+  status: IncidentStatus!
+  closedOn: Date
+  createdAt: DateTime
+}
+
+input DeclareIncidentInput {
+  driverId: ID
+  type: IncidentType!
+  occurredAt: DateTime!
+  location: String!
+  latitude: Float
+  longitude: Float
+  description: String!
+  thirdPartyInvolved: Boolean
+  injuries: Boolean
+}
+
+type SweepReport {
+  deadlineAlerts: Int!
+  overrunAlerts: Int!
+  skipped: Boolean!
+}

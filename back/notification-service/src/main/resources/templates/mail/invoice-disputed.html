@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" th:replace="~{mail/layout :: email(~{::title}, ~{::section})}" lang="fr">
+<head><title th:text="|Facture contestée : ${invoiceNumber} (devis ${reference})|">Facture contestée</title></head>
+<body>
+<section>
+  <p style="margin:0 0 14px;">Bonjour,</p>
+  <p style="margin:0 0 14px;">
+    La facture <strong th:text="${invoiceNumber}">F</strong> du garage
+    <strong th:text="${garage.name}">Garage</strong> dépasse le montant accepté du devis
+    <strong th:text="${reference}">DEV</strong> au-delà de la tolérance (2 %, 10 € minimum).
+    Elle est bloquée en attendant votre vérification.
+  </p>
+  <table th:replace="~{mail/fragments :: facts(${ { {'Montant accepté HT', fmt.money(acceptedAmount)},
+      {'Montant facturé HT', fmt.money(invoiceAmount)}, {'Écart', fmt.money(variance)}, {'Date de facture', fmt.date(invoicedOn)} } })}"></table>
+  <a th:replace="~{mail/fragments :: button(${portalUrl + '/devis/' + quoteId}, 'Vérifier la facture')}"></a>
+</section>
+</body>
+</html>

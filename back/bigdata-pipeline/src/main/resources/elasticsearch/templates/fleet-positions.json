@@ -1,0 +1,53 @@
+{
+  "index_patterns": [
+    "fleet-positions"
+  ],
+  "priority": 200,
+  "template": {
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 0
+    },
+    "mappings": {
+      "dynamic": "false",
+      "properties": {
+        "vehicleId": {
+          "type": "keyword"
+        },
+        "companyId": {
+          "type": "keyword"
+        },
+        "companyName": {
+          "type": "keyword"
+        },
+        "registration": {
+          "type": "keyword"
+        },
+        "category": {
+          "type": "keyword"
+        },
+        "energy": {
+          "type": "keyword"
+        },
+        "at": {
+          "type": "date"
+        },
+        "location": {
+          "type": "geo_point"
+        },
+        "speedKmh": {
+          "type": "integer"
+        },
+        "ignition": {
+          "type": "boolean"
+        },
+        "batteryPercent": {
+          "type": "integer"
+        }
+      }
+    }
+  },
+  "_meta": {
+    "description": "FleetPilot analytics: fleet-positions"
+  }
+}

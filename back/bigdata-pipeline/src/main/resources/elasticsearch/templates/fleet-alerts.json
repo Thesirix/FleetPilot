@@ -1,0 +1,62 @@
+{
+  "index_patterns": [
+    "fleet-alerts"
+  ],
+  "priority": 200,
+  "template": {
+    "settings": {
+      "number_of_shards": 1,
+      "number_of_replicas": 0
+    },
+    "mappings": {
+      "dynamic": "false",
+      "properties": {
+        "alertId": {
+          "type": "keyword"
+        },
+        "vehicleId": {
+          "type": "keyword"
+        },
+        "companyId": {
+          "type": "keyword"
+        },
+        "companyName": {
+          "type": "keyword"
+        },
+        "registration": {
+          "type": "keyword"
+        },
+        "category": {
+          "type": "keyword"
+        },
+        "energy": {
+          "type": "keyword"
+        },
+        "type": {
+          "type": "keyword"
+        },
+        "severity": {
+          "type": "keyword"
+        },
+        "message": {
+          "type": "text",
+          "fields": {
+            "raw": {
+              "type": "keyword",
+              "ignore_above": 256
+            }
+          }
+        },
+        "raisedAt": {
+          "type": "date"
+        },
+        "location": {
+          "type": "geo_point"
+        }
+      }
+    }
+  },
+  "_meta": {
+    "description": "FleetPilot analytics: fleet-alerts"
+  }
+}

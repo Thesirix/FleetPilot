@@ -1,0 +1,121 @@
+# GitLab CI equivalent of .github/workflows/ci.yml (the public repository is on GitHub).
+# Integration tests use Testcontainers, hence the Docker-in-Docker service.
+
+stages:
+  - build
+  - quality
+  - package
+
+variables:
+  MAVEN_OPTS: "-Dmaven.repo.local=$CI_PROJECT_DIR/.m2/repository"
+  MAVEN_CLI_OPTS: "-B -ntp"
+  DOCKER_HOST: "tcp://docker:2375"
+  DOCKER_TLS_CERTDIR: ""
+  TESTCONTAINERS_HOST_OVERRIDE: "docker"
+
+cache:
+  key: maven-$CI_COMMIT_REF_SLUG
+  paths:
+    - .m2/repository
+
+frontend:
+  stage: build
+  image: node:24
+  variables:
+    CYPRESS_INSTALL_BINARY: "0"
+    PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: "1"
+  script:
+    - cd front
+    - npm ci
+    - npx nuxt typecheck
+    - npm test
+    - npx nuxt generate
+
+backend:
+  stage: build
+  image: eclipse-temurin:25-jdk
+  services:
+    - name: docker:28-dind
+      alias: docker
+  script:
+    - cd back
+    - sh mvnw $MAVEN_CLI_OPTS verify
+  artifacts:
+    when: always
+    expire_in: 2 weeks
+    reports:
+      junit:
+        - back/**/target/surefire-reports/TEST-*.xml
+        - back/**/target/failsafe-reports/TEST-*.xml
+    paths:
+      - back/**/target/site/jacoco/
+      - back/**/target/cucumber/
+      - back/**/target/classes/
+      - back/**/target/test-classes/
+
+
+android:
+  stage: build
+  image: eclipse-temurin:21-jdk
+  variables:
+    ANDROID_HOME: "$CI_PROJECT_DIR/.android-sdk"
+    GRADLE_USER_HOME: "$CI_PROJECT_DIR/.gradle"
+  before_script:
+    # Command line tools only; the Android Gradle Plugin installs the platform and build tools it needs
+    - apt-get update -qq && apt-get install -y -qq unzip > /dev/null
+    - mkdir -p "$ANDROID_HOME/cmdline-tools"
+    - curl -sSL -o /tmp/tools.zip https://dl.google.com/android/repository/commandlinetools-linux-13114758_latest.zip
+    - unzip -q /tmp/tools.zip -d "$ANDROID_HOME/cmdline-tools" && mv "$ANDROID_HOME/cmdline-tools/cmdline-tools" "$ANDROID_HOME/cmdline-tools/latest"
+    - yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses > /dev/null
+  script:
+    - cd mobile/android
+    - sh gradlew --no-daemon testDebugUnitTest assembleDebug
+  cache:
+    key: gradle-$CI_COMMIT_REF_SLUG
+    paths:
+      - .gradle/caches
+      - .gradle/wrapper
+  artifacts:
+    when: always
+    expire_in: 2 weeks
+    reports:
+      junit:
+        - mobile/android/app/build/test-results/testDebugUnitTest/TEST-*.xml
+    paths:
+      - mobile/android/app/build/outputs/apk/debug/
+sonarqube:
+  stage: quality
+  image: eclipse-temurin:25-jdk
+  needs: [backend]
+  rules:
+    - if: $SONAR_TOKEN && $SONAR_HOST_URL
+  variables:
+    GIT_DEPTH: "0"
+  script:
+    - cd back
+    - sh mvnw $MAVEN_CLI_OPTS sonar:sonar -Dsonar.host.url="$SONAR_HOST_URL" -Dsonar.token="$SONAR_TOKEN" -Dsonar.qualitygate.wait=true
+
+images:
+  stage: package
+  image: docker:28
+  services:
+    - name: docker:28-dind
+      alias: docker
+  needs: [backend]
+  parallel:
+    matrix:
+      - SERVICE: [vehicle-service, quote-service, notification-service, reporting-service, telemetry-service,
+                  vehicle-simulator, integration-esb, bigdata-pipeline, energy-service, graphql-gateway]
+  script:
+    - docker build -f back/Dockerfile --build-arg SERVICE=$SERVICE -t fleetpilot/$SERVICE:$CI_COMMIT_SHORT_SHA back
+
+extranet-images:
+  stage: package
+  image: docker:28
+  services:
+    - name: docker:28-dind
+      alias: docker
+  needs: [backend]
+  script:
+    - docker build -f infra/tomcat/Dockerfile --build-context tomcat=infra/tomcat -t fleetpilot/tomcat-extranet:$CI_COMMIT_SHORT_SHA back
+    - docker build -t fleetpilot/apache-extranet:$CI_COMMIT_SHORT_SHA infra/apache

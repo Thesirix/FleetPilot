@@ -1,0 +1,50 @@
+server:
+  port: 8082
+  shutdown: graceful
+  forward-headers-strategy: framework
+
+spring:
+  application:
+    name: graphql-gateway
+  threads:
+    virtual:
+      enabled: true
+  graphql:
+    graphiql:
+      enabled: true
+    schema:
+      printer:
+        enabled: true
+    http:
+      path: /graphql
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${OIDC_ISSUER_URI:http://localhost:8180/realms/fleetpilot}
+          jwk-set-uri: ${OIDC_JWK_SET_URI:http://localhost:8180/realms/fleetpilot/protocol/openid-connect/certs}
+          audiences: fleetpilot-api
+
+fleetpilot:
+  services:
+    vehicle-url: ${VEHICLE_SERVICE_URL:http://localhost:8081}
+    quote-url: ${QUOTE_SERVICE_URL:http://localhost:8083}
+    notification-url: ${NOTIFICATION_SERVICE_URL:http://localhost:8084}
+    reporting-url: ${REPORTING_SERVICE_URL:http://localhost:8085}
+    telemetry-url: ${TELEMETRY_SERVICE_URL:http://localhost:8086}
+    integration-url: ${INTEGRATION_SERVICE_URL:http://localhost:8088}
+    energy-url: ${ENERGY_SERVICE_URL:http://localhost:8090}
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,prometheus
+  endpoint:
+    health:
+      probes:
+        enabled: true
+
+logging:
+  level:
+    com.fleetpilot: INFO

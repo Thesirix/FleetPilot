@@ -1,0 +1,348 @@
+# Types of the savings module (quote-service): garage quotes, garage network, reference tariff.
+
+enum QuoteStatus { RECEIVED IN_REVIEW TO_NEGOTIATE ACCEPTED REJECTED COMPLETED INVOICED }
+enum QuoteChannel { PORTAL ESB API }
+enum LineKind { PART LABOUR SUPPLIES }
+enum Finding { OVERPRICED_PART EXCESSIVE_TIME OVERPRICED_RATE DUPLICATE EXCESSIVE_SUPPLIES UNKNOWN_ITEM }
+enum QuoteAction { IDENTIFY_VEHICLE COUNTER_OFFER ACCEPT REJECT ANSWER_COUNTER_OFFER REVISE COMPLETE INVOICE }
+enum QuoteParty { GARAGE MANAGER SYSTEM }
+enum QuoteHistoryAction {
+  SUBMITTED VEHICLE_IDENTIFIED ANALYSED AUTO_APPROVED COUNTER_OFFER COUNTER_ACCEPTED COUNTER_REFUSED REVISED
+  ACCEPTED REJECTED COMPLETED INVOICED
+}
+enum GarageNetwork { DEALER INDEPENDENT FAST_FIT BODYWORK TRUCK }
+enum Region { IDF PAC ARA HDF NAQ OCC PDL GES }
+enum LabourCategory { MECH ELEC BODY PAINT }
+
+extend type Query {
+  "Garage quotes visible to the user: all for staff, their company for a client manager, their own for a garage."
+  quotes(filter: QuoteFilter, page: Int = 0, size: Int = 20, sort: [String!]): QuotePage!
+  quote(id: ID!): Quote
+  "Savings indicators of one company, or of every visible company."
+  savings(companyId: ID): SavingsSummary!
+
+  garages(filter: GarageFilter, page: Int = 0, size: Int = 20, sort: [String!]): GaragePage!
+  garage(id: ID!): Garage
+  "The garage of the connected garage user (garage role only)."
+  myGarage: Garage
+  "The reference tariff: part prices, standard labour times and negotiated rates."
+  tariff: Tariff!
+}
+
+extend type Mutation {
+  "Garage (or staff on its behalf): send a quote; it is analysed at once."
+  submitQuote(input: SubmitQuoteInput!): Quote!
+  "Garage: send a new version of an open quote."
+  reviseQuote(id: ID!, lines: [QuoteLineInput!]!, message: String): Quote!
+  "Garage: accept or refuse the counter-offer of the fleet manager."
+  answerCounterOffer(id: ID!, accept: Boolean!, message: String): Quote!
+  "Garage: the work is done."
+  completeQuote(id: ID!, completedOn: Date): Quote!
+  "Garage: the invoice, reconciled with the accepted amount."
+  invoiceQuote(id: ID!, number: String!, amount: Float!, invoicedOn: Date): Quote!
+
+  "Staff: link a received quote to a vehicle of the fleet; it is then analysed."
+  identifyQuoteVehicle(id: ID!, registration: String!): Quote!
+  "Staff: propose a lower amount to the garage."
+  counterOffer(id: ID!, amount: Float!, message: String): Quote!
+  "Staff: accept the quote (justification required when it has overcharges)."
+  acceptQuote(id: ID!, comment: String): Quote!
+  "Staff: reject the quote."
+  rejectQuote(id: ID!, reason: String!): Quote!
+
+  createGarage(input: GarageInput!): Garage!
+  updateGarage(id: ID!, input: GarageInput!): Garage!
+  approveGarage(id: ID!, approved: Boolean!, rating: Float): Garage!
+  "Administrator: new negotiated hourly rates for a region and a labour category."
+  updateLabourRate(region: Region!, category: LabourCategory!, hourlyRate: Float!, truckHourlyRate: Float!): LabourRate!
+}
+
+extend type Vehicle {
+  "Garage quotes received for this vehicle, most recent first."
+  quotes: [QuoteSummary!]!
+}
+
+extend type Viewer {
+  garageId: ID
+}
+
+# ------------------------------------------------------------------ quotes
+
+input QuoteFilter {
+  companyId: ID
+  garageId: ID
+  vehicleId: ID
+  status: QuoteStatus
+  "true: waiting for a decision, false: decided."
+  open: Boolean
+  "true: only quotes with findings."
+  withFindings: Boolean
+  "Reference of the quote, of the garage, or registration."
+  q: String
+}
+
+input QuoteLineInput {
+  kind: LineKind!
+  code: String
+  label: String!
+  quantity: Float!
+  unitPrice: Float!
+}
+
+input SubmitQuoteInput {
+  garageId: ID
+  registration: String!
+  garageReference: String
+  mileage: Int
+  description: String!
+  lines: [QuoteLineInput!]!
+}
+
+type QuotePage {
+  content: [QuoteSummary!]!
+  page: Int!
+  size: Int!
+  totalElements: Int!
+  totalPages: Int!
+}
+
+type GarageRef { id: ID! name: String! city: String! network: GarageNetwork! }
+
+type QuoteVehicle {
+  id: ID!
+  companyId: ID!
+  registration: String!
+  make: String
+  model: String
+  category: String!
+  energy: String
+}
+
+type QuoteSummary {
+  id: ID!
+  reference: String!
+  status: QuoteStatus!
+  garage: GarageRef!
+  registration: String!
+  vehicle: QuoteVehicle
+  companyId: ID
+  channel: QuoteChannel!
+  submittedAt: DateTime!
+  amount: Float!
+  referenceAmount: Float
+  overcharge: Float!
+  acceptedAmount: Float
+  savings: Float
+  findingCount: Int!
+  autoApproved: Boolean!
+  counterOffer: Float
+  revision: Int!
+  invoiceDisputed: Boolean!
+}
+
+type QuoteLine {
+  id: ID!
+  position: Int!
+  kind: LineKind!
+  code: String
+  label: String!
+  "Hours for labour, units otherwise."
+  quantity: Float!
+  "Hourly rate for labour."
+  unitPrice: Float!
+  amount: Float!
+  "Standard time for labour."
+  referenceQuantity: Float
+  "Reference price or negotiated rate."
+  referenceUnitPrice: Float
+  referenceAmount: Float
+  overcharge: Float!
+  finding: Finding
+  findingDetail: String
+}
+
+type QuoteHistory {
+  at: DateTime!
+  party: QuoteParty!
+  author: String!
+  action: QuoteHistoryAction!
+  amount: Float
+  message: String
+}
+
+type Quote {
+  id: ID!
+  reference: String!
+  status: QuoteStatus!
+  garage: GarageRef!
+  registration: String!
+  vehicle: QuoteVehicle
+  companyId: ID
+  channel: QuoteChannel!
+  garageReference: String
+  mileage: Int
+  description: String!
+  revision: Int!
+  submittedAt: DateTime!
+  analysedAt: DateTime
+  amount: Float!
+  initialAmount: Float!
+  referenceAmount: Float
+  overcharge: Float!
+  findingCount: Int!
+  counterOffer: Float
+  acceptedAmount: Float
+  savings: Float
+  autoApproved: Boolean!
+  decidedAt: DateTime
+  decidedBy: String
+  decisionComment: String
+  completedOn: Date
+  invoiceNumber: String
+  invoiceAmount: Float
+  invoicedOn: Date
+  invoiceVariance: Float
+  invoiceDisputed: Boolean!
+  lines: [QuoteLine!]!
+  history: [QuoteHistory!]!
+  "What the connected user may do on this quote."
+  actions: [QuoteAction!]!
+  version: Int!
+}
+
+# ------------------------------------------------------------------ savings
+
+type MonthlySavings { month: String! quotes: Int! quoted: Float! accepted: Float! savings: Float! }
+type FindingCount { finding: Finding! lines: Int! overcharge: Float! }
+type GarageRanking { garageId: ID! name: String! city: String! quotes: Int! overchargeRate: Float! savings: Float! }
+
+type SavingsSummary {
+  quotes: Int!
+  openQuotes: Int!
+  toNegotiate: Int!
+  toReview: Int!
+  received: Int!
+  amountQuoted: Float!
+  amountAccepted: Float!
+  savings: Float!
+  "Savings / amount quoted on the decided quotes, in percent."
+  savingsRate: Float!
+  "Overcharges detected on the open quotes: what is left to negotiate."
+  pendingOvercharge: Float!
+  "Accepted quotes approved without human action, in percent."
+  autoApprovalRate: Float!
+  disputedInvoices: Int!
+  months: [MonthlySavings!]!
+  findings: [FindingCount!]!
+  garagesToWatch: [GarageRanking!]!
+}
+
+# ------------------------------------------------------------------ garages
+
+input GarageFilter {
+  region: Region
+  network: GarageNetwork
+  approved: Boolean
+  "Name, city, code or postal code."
+  q: String
+}
+
+input GarageInput {
+  name: String!
+  network: GarageNetwork!
+  brand: String
+  siret: String!
+  address: String!
+  postalCode: String!
+  city: String!
+  latitude: Float
+  longitude: Float
+  email: String!
+  phone: String
+  hourlyRate: Float!
+}
+
+type GaragePage {
+  content: [GarageSummary!]!
+  page: Int!
+  size: Int!
+  totalElements: Int!
+  totalPages: Int!
+}
+
+type GarageSummary {
+  id: ID!
+  code: String!
+  name: String!
+  network: GarageNetwork!
+  brand: String
+  city: String!
+  postalCode: String!
+  region: Region!
+  hourlyRate: Float!
+  approved: Boolean!
+  rating: Float
+  latitude: Float
+  longitude: Float
+}
+
+type GarageStats {
+  quotes: Int!
+  openQuotes: Int!
+  acceptedQuotes: Int!
+  rejectedQuotes: Int!
+  amountQuoted: Float!
+  overchargeDetected: Float!
+  "Overcharges detected / amount quoted, in percent."
+  overchargeRate: Float!
+  savings: Float!
+  averageDecisionHours: Float
+  disputedInvoices: Int!
+  lastQuoteAt: DateTime
+}
+
+type Garage {
+  id: ID!
+  code: String!
+  name: String!
+  network: GarageNetwork!
+  brand: String
+  siret: String!
+  address: String!
+  postalCode: String!
+  city: String!
+  region: Region!
+  regionLabel: String!
+  latitude: Float
+  longitude: Float
+  email: String!
+  phone: String
+  hourlyRate: Float!
+  approved: Boolean!
+  approvedSince: Date
+  rating: Float
+  stats: GarageStats!
+  version: Int!
+  "Most recent quotes of the garage visible to the user."
+  quotes(size: Int = 10): [QuoteSummary!]!
+}
+
+# ------------------------------------------------------------------ reference tariff
+
+type PartPrice { code: String! label: String! family: String! priceCar: Float! priceVan: Float! priceTruck: Float! }
+type StandardTime {
+  code: String!
+  label: String!
+  labourCategory: LabourCategory!
+  hoursCar: Float!
+  hoursVan: Float!
+  hoursTruck: Float!
+}
+type LabourRate {
+  region: Region!
+  regionLabel: String!
+  labourCategory: LabourCategory!
+  hourlyRate: Float!
+  truckHourlyRate: Float!
+}
+type Tariff { parts: [PartPrice!]! operations: [StandardTime!]! rates: [LabourRate!]! }
