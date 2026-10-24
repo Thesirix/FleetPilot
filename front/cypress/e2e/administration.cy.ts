@@ -130,7 +130,7 @@ describe('Administration', () => {
   it('shows the staff accounts of the directory as read only', () => {
     cy.visit('/administration/utilisateurs?role=fleet-manager')
     cy.contains('tbody tr', 'Claire Morel').click()
-    cy.contains('annuaire de l'entreprise (LDAP)')
+    cy.contains("annuaire de l'entreprise (LDAP)")
     cy.contains('button', 'Modifier').should('not.exist')
   })
 

@@ -4,7 +4,7 @@
 // tools/scripts/clean-test-data.sh.
 
 const stamp = () => String(Date.now()).slice(-6)
-const letters = 'ABCDEFGHJKLMNPRSTVWXYZ'
+const letters = 'ABCDEFGHJKLMNPRTVWXYZ' // no S: the pair SS is never issued
 const pick = () => letters[Math.floor(Math.random() * letters.length)]
 
 describe('Forms of the fleet', () => {

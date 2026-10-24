@@ -16,7 +16,7 @@ jobs:
   backend:
     # One job per module: each one shows up on its own in the run, with the list of its tests in its summary
     name: Back-end / ${{ matrix.module }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
       checks: write
@@ -72,7 +72,7 @@ jobs:
     name: Quality gate (SonarQube)
     # Runs only when the repository defines SONAR_HOST_URL (Settings > Secrets and variables > Actions)
     if: ${{ vars.SONAR_HOST_URL != '' }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     env:
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       SONAR_HOST_URL: ${{ vars.SONAR_HOST_URL }}
@@ -93,7 +93,7 @@ jobs:
 
   frontend:
     name: Portal (types, unit tests, build)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     defaults:
       run:
         working-directory: front
@@ -118,7 +118,7 @@ jobs:
 
   android:
     name: Driver app (Android, unit tests, build)
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     permissions:
       contents: read
       checks: write
@@ -155,7 +155,7 @@ jobs:
   images:
     name: Docker images
     needs: [backend, frontend]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     strategy:
       matrix:
         service: [vehicle-service, quote-service, notification-service, reporting-service, telemetry-service, vehicle-simulator, integration-esb, bigdata-pipeline, energy-service, graphql-gateway]
@@ -167,7 +167,7 @@ jobs:
   extranet-images:
     name: Lessor extranet images (Tomcat, Apache)
     needs: [backend]
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
       - name: Tomcat 11 with the WAR
@@ -178,7 +178,7 @@ jobs:
   compose:
     name: Docker Compose smoke test
     needs: images
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v5
       - name: Start the platform

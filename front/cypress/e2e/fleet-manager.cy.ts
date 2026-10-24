@@ -44,7 +44,7 @@ describe('Fleet manager', () => {
   })
 
   it('adds a vehicle to the fleet and gets its deadlines scheduled', () => {
-    const letters = 'ABCDEFGHJKLMNPRSTVWXYZ'
+    const letters = 'ABCDEFGHJKLMNPRTVWXYZ' // no S: the pair SS is never issued
     const pick = () => letters[Math.floor(Math.random() * letters.length)]
     const plate = `ZC-${String(Math.floor(Math.random() * 900) + 100)}-${pick()}${pick()}`
     const vin = `VF1CY${String(Date.now()).slice(-12)}`

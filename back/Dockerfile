@@ -25,7 +25,7 @@ COPY acceptance-tests/pom.xml acceptance-tests/pom.xml
 RUN chmod +x mvnw && ./mvnw -B -q dependency:go-offline -DexcludeReactor=true || true
 COPY . .
 ARG SERVICE
-RUN ./mvnw -B -q -pl ${SERVICE} -am package -DskipTests -Dcheckstyle.skip \
+RUN chmod +x mvnw && ./mvnw -B -q -pl ${SERVICE} -am package -DskipTests -Dcheckstyle.skip \
     && java -Djarmode=tools -jar ${SERVICE}/target/${SERVICE}.jar extract --layers --launcher --destination /extracted
 
 FROM eclipse-temurin:25-jre AS runtime

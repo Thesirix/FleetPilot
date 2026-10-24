@@ -37,9 +37,11 @@ class FleetLifecycleIT extends IntegrationTestBase {
 
     private static String randomRegistration() {
         String letters = "ABCDEFGHJKLMNPRSTVWXYZ";
+        // No S in the last letter: the pair SS is never issued and would be refused
+        String lastLetters = letters.replace("S", "");
         ThreadLocalRandom r = ThreadLocalRandom.current();
         return "ZZ-%03d-".formatted(1 + r.nextInt(999))
-                + letters.charAt(r.nextInt(letters.length())) + letters.charAt(r.nextInt(letters.length()));
+                + letters.charAt(r.nextInt(letters.length())) + lastLetters.charAt(r.nextInt(lastLetters.length()));
     }
 
     private static String randomVin() {
