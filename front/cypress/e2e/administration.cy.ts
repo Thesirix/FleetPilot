@@ -136,7 +136,8 @@ describe('Administration', () => {
 
   it('changes a rule of the quote analysis, refuses an automatic approval above the delegation, then restores it', () => {
     cy.visit('/administration/parametres')
-    cy.get('#r-auto').clear().type('9000')
+    // the form is filled once the saved rules have arrived: typing before would mix both values
+    cy.get('#r-auto').should('not.have.value', '0').clear().type('9000')
     cy.contains('button', 'Enregistrer les règles').click()
     cy.contains('La validation automatique doit rester sous la délégation d\'un gestionnaire.')
 
@@ -147,7 +148,7 @@ describe('Administration', () => {
     cy.contains(/conformes jusqu.à 320\s€ HT sont validés automatiquement/)
 
     cy.visit('/administration/parametres')
-    cy.get('#r-auto').clear().type('300')
+    cy.get('#r-auto').should('have.value', '320').clear().type('300')
     cy.contains('button', 'Enregistrer les règles').click()
     cy.contains('Règles d\'analyse enregistrées')
   })
