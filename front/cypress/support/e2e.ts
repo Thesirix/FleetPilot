@@ -14,6 +14,14 @@ declare global {
 const KEYCLOAK_URL = 'http://localhost:8180'
 const DEMO_PASSWORD = 'FleetPilot2026!'
 
+// The portal follows the language of the browser: the tests read French labels, whatever the machine
+// (the GitHub runners are in English)
+const BROWSER_LANGUAGE = 'fr-FR'
+Cypress.on('window:before:load', win => {
+  Object.defineProperty(win.navigator, 'language', { value: BROWSER_LANGUAGE })
+  Object.defineProperty(win.navigator, 'languages', { value: [BROWSER_LANGUAGE, 'fr'] })
+})
+
 Cypress.Commands.add('login', (username: string) => {
   cy.session(username, () => {
     cy.visit('/')
