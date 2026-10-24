@@ -17,6 +17,7 @@ const DEMO_PASSWORD = 'FleetPilot2026!'
 // The portal follows the language of the browser: the tests read French labels, whatever the machine
 // (the GitHub runners are in English)
 const BROWSER_LANGUAGE = 'fr-FR'
+const LOCALE_COOKIE = 'fleetpilot_locale'
 Cypress.on('window:before:load', win => {
   Object.defineProperty(win.navigator, 'language', { value: BROWSER_LANGUAGE })
   Object.defineProperty(win.navigator, 'languages', { value: [BROWSER_LANGUAGE, 'fr'] })
@@ -24,6 +25,8 @@ Cypress.on('window:before:load', win => {
 
 Cypress.Commands.add('login', (username: string) => {
   cy.session(username, () => {
+    // The language chosen is kept in a cookie, saved with the session: the portal never has to guess it
+    cy.setCookie(LOCALE_COOKIE, 'fr')
     cy.visit('/')
     cy.origin(KEYCLOAK_URL, { args: { username, password: DEMO_PASSWORD } },
       ({ username, password }) => {
@@ -32,6 +35,7 @@ Cypress.Commands.add('login', (username: string) => {
         cy.get('#kc-login').click()
       })
     cy.location('pathname', { timeout: 20000 }).should('not.include', '/auth/callback')
+    cy.setCookie(LOCALE_COOKIE, 'fr')
   }, {
     validate() {
       cy.window().then(win => {

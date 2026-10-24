@@ -199,6 +199,14 @@ jobs:
       - name: End-to-end tests of the portal (Cypress, real Keycloak)
         working-directory: front
         run: npm ci && npx cypress run
+      - name: Cypress screenshots
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-screenshots
+          path: front/cypress/screenshots/
+          if-no-files-found: ignore
+          retention-days: 14
       - name: Lessor extranet behind Apache and Tomcat
         run: |
           test "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:8095/extranet/)" = "302"
