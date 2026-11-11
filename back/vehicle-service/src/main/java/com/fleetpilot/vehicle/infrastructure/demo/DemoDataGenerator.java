@@ -57,6 +57,12 @@ final class DemoDataGenerator {
     private static final String VIN_CHARS = "ABCDEFGHJKLMNPRSTUVWXYZ0123456789";
     private static final String PLATE_LETTERS = "ABCDEFGHJKLMNPQRSTVWXYZ";
     private static final LocalDate SIV_START = LocalDate.of(2009, 4, 15);
+    /**
+     * Day the registrations of the demo were drawn on. A registration is kept for the whole life of a vehicle: it is
+     * computed as if the data set were installed on this day, so the plates (GR-832-SJ for Jean Dupont...) stay the
+     * same whatever the install day, while the other dates keep following the reference date.
+     */
+    static final LocalDate REGISTRATION_DAY = LocalDate.of(2026, 10, 24);
     private static final String[] LESSOR_CODES = {"AYV", "ARV", "LSY", "ALP", "F2M", "ATH"};
     private static final int[] LESSOR_WEIGHTS = {30, 25, 12, 13, 10, 10};
 
@@ -238,6 +244,7 @@ final class DemoDataGenerator {
             ageDays = random.nextInt(12);
         }
         LocalDate firstRegistration = today.minusDays(ageDays);
+        LocalDate registeredAsOf = firstRegistration.minusDays(ChronoUnit.DAYS.between(REGISTRATION_DAY, today));
         double factor = switch (category) {
             case CAR -> 1.0;
             case VAN -> 0.9;
@@ -250,7 +257,7 @@ final class DemoDataGenerator {
         int co2 = model.co2() == 0 ? 0 : model.co2() - 3 + random.nextInt(7);
         VehicleRow row = new VehicleRow(uuid("vehicle", spec.code() + index), companyId,
                 siteIds.get(weightedSite(siteIds.size())), costCenterIds.get(random.nextInt(costCenterIds.size())),
-                registration(firstRegistration), vin(model.wmi(), firstRegistration), category.name(), model.make(),
+                registration(registeredAsOf), vin(model.wmi(), firstRegistration), category.name(), model.make(),
                 model.model(), model.trim(), model.energy().name(), critAir(model.energy(), firstRegistration), co2,
                 model.fiscalPower(), firstRegistration, lease ? "LEASE" : "OWNED", mileage,
                 at(today.minusDays(random.nextInt(21)), 18), status);

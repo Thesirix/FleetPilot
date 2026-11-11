@@ -103,6 +103,23 @@ class DemoDataGeneratorTest {
     }
 
     @Test
+    void jean_dupont_keeps_the_same_plate_whatever_the_install_day() {
+        // His vehicle is used by the end-to-end tests, the driver app and the README
+        for (LocalDate day : new LocalDate[] {TODAY, LocalDate.of(2026, 10, 31), LocalDate.of(2026, 11, 10),
+                LocalDate.of(2027, 1, 1), LocalDate.of(2027, 6, 1)}) {
+            DemoDataset set = day.equals(TODAY) ? data : new DemoDataGenerator(DemoDataGenerator.DEFAULT_SEED, day).generate();
+            DemoDataset.DriverRow jean = set.drivers.stream()
+                    .filter(d -> (d.firstName() + " " + d.lastName()).equals("Jean Dupont")
+                            && d.companyId().equals(DemoDataGenerator.uuid("company", "NEO")))
+                    .findFirst().orElseThrow();
+            UUID vehicle = set.assignments.stream().filter(a -> a.driverId().equals(jean.id()) && a.endDate() == null)
+                    .findFirst().orElseThrow().vehicleId();
+            assertThat(set.vehicles).as(day.toString()).filteredOn(v -> v.id().equals(vehicle)).singleElement()
+                    .extracting(VehicleRow::registration).isEqualTo("GR-832-SJ");
+        }
+    }
+
+    @Test
     void the_demo_has_something_to_do_for_the_fleet_manager() {
         assertThat(data.deadlines).anyMatch(d -> "OPEN".equals(d.status()) && d.dueDate() != null && d.dueDate().isBefore(TODAY));
         assertThat(data.incidents).anyMatch(i -> "DECLARED".equals(i.status()));
