@@ -559,6 +559,8 @@
     }
   },
   "errors": {
+    "DEMO_READ_ONLY": "Read-only demo: changes are disabled.",
+    "DEMO_NOT_RECORDED": "This view is not available in the demo.",
     "VALIDATION_FAILED": "Some fields are invalid.",
     "REGISTRATION_ALREADY_USED": "This registration number is already in the fleet.",
     "VIN_ALREADY_USED": "This VIN is already in the fleet.",

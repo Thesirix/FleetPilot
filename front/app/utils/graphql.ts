@@ -1,4 +1,5 @@
 import { accessToken, login } from './auth'
+import { demoGraphql, isDemo } from '~/demo/demo'
 
 /** A field refused by the service, as sent in `extensions.fieldErrors`. */
 export interface FieldError {
@@ -47,6 +48,14 @@ export async function graphql<T>(query: string, variables: Record<string, unknow
   if (!token) {
     await login()
     throw new GraphqlError('Not signed in', 'UNAUTHORIZED')
+  }
+  if (isDemo()) {
+    const body = (await demoGraphql(query, variables)) as { data?: T; errors?: RawError[] }
+    if (body.errors?.length) {
+      const ext = body.errors[0]!.extensions ?? {}
+      throw new GraphqlError(body.errors[0]!.message, ext.code ?? 'ERROR')
+    }
+    return { data: body.data as T, stale: false }
   }
   let response: Response
   try {

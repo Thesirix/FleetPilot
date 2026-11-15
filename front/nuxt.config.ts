@@ -1,3 +1,6 @@
+// Base path of the site: '/' normally, '/FleetPilot/' for the static demo on GitHub Pages
+const base = process.env.NUXT_APP_BASE_URL ?? '/'
+
 // FleetPilot web portal. A single-page application (the data is private, behind Keycloak) that installs as a PWA,
 // including on iPhone where there is no native app.
 export default defineNuxtConfig({
@@ -27,8 +30,8 @@ export default defineNuxtConfig({
         { name: 'apple-mobile-web-app-status-bar-style', content: 'default' },
       ],
       link: [
-        { rel: 'icon', type: 'image/svg+xml', href: '/favicon.svg' },
-        { rel: 'apple-touch-icon', href: '/apple-touch-icon-180x180.png' },
+        { rel: 'icon', type: 'image/svg+xml', href: `${base}favicon.svg` },
+        { rel: 'apple-touch-icon', href: `${base}apple-touch-icon-180x180.png` },
       ],
     },
   },
@@ -39,6 +42,8 @@ export default defineNuxtConfig({
       oidcAuthority: 'http://localhost:8180/realms/fleetpilot',
       oidcClientId: 'fleetpilot-portal',
       graphqlUrl: '/graphql',
+      // Static demo with recorded data (see app/demo/demo.ts)
+      demo: false,
       // Dashboards of the observability profile (docker compose --profile observability up -d)
       kibanaUrl: 'http://localhost:5601/app/dashboards',
       // Lessor extranet (legacy WAR behind Apache), where the lessor accounts work
@@ -73,6 +78,8 @@ export default defineNuxtConfig({
   },
 
   pwa: {
+    // The static demo (NUXT_PUBLIC_DEMO=true, GitHub Pages) registers no service worker
+    disable: process.env.NUXT_PUBLIC_DEMO === 'true',
     registerType: 'autoUpdate',
     manifest: {
       name: 'FleetPilot',

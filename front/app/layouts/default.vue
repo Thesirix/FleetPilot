@@ -14,6 +14,7 @@ const menuOpen = ref(false)
         </button>
         <NuxtLink to="/"><AppLogo /></NuxtLink>
       </header>
+      <DemoBanner />
       <main class="content">
         <slot />
       </main>

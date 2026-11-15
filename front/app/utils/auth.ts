@@ -1,6 +1,16 @@
 import { UserManager, WebStorageStateStore, type User } from 'oidc-client-ts'
 
+import { isDemo } from '~/demo/demo'
+
 let manager: UserManager | null = null
+
+/** The signed-in user of the static demo (the platform administrator of the demo dataset). */
+const DEMO_USER = {
+  access_token: 'demo',
+  id_token: 'demo',
+  expired: false,
+  profile: { sub: 'demo', preferred_username: 'theo.lambert', name: 'Théo Lambert' },
+} as unknown as User
 
 /**
  * The OpenID Connect client of the portal (authorization code + PKCE with Keycloak). The tokens stay in the session
@@ -25,16 +35,26 @@ export function userManager(): UserManager {
 }
 
 export async function currentUser(): Promise<User | null> {
+  if (isDemo()) {
+    return DEMO_USER
+  }
   const user = await userManager().getUser()
   return user && !user.expired ? user : null
 }
 
 /** Sends the browser to the Keycloak login page, then back to the page the user wanted. */
 export async function login(returnTo = window.location.pathname + window.location.search): Promise<void> {
+  if (isDemo()) {
+    return
+  }
   await userManager().signinRedirect({ state: { returnTo } })
 }
 
 export async function logout(): Promise<void> {
+  if (isDemo()) {
+    window.location.href = useRuntimeConfig().app.baseURL
+    return
+  }
   const user = await userManager().getUser()
   await userManager().signoutRedirect({ id_token_hint: user?.id_token })
 }

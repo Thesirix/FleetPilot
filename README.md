@@ -20,6 +20,8 @@ platform.**
 [![Docker](https://img.shields.io/badge/Docker-one_command-2496ED?style=flat-square&logo=docker&logoColor=white)](#quick-start)
 [![Tests](https://img.shields.io/badge/tests-500%2B-2EAD33?style=flat-square&logo=junit5&logoColor=white)](#quality--testing)
 
+**[Try the live demo](https://thesirix.github.io/FleetPilot/)** (portal, read-only, data recorded from the demo dataset)
+
 [Why FleetPilot](#why-fleetpilot) · [Quick start](#quick-start) · [Product tour](#product-tour) · [Features](#feature-reference) · [Tech stack](#tech-stack) · [Architecture](#architecture) · [Testing](#quality--testing) · [FAQ](#faq)
 
 <br /><br />
@@ -59,6 +61,10 @@ identity provider and an analytics stack, all started with **one `docker compose
 | **Partners plugged in**            | Garages send XML quotes or use their own space, lessors use their extranet, the insurer is called through its API, fuel card providers drop CSV files: one integration bus, every exchange logged and replayable. |
 | **Run from the portal**            | Client companies, sites, user accounts, rules of the quote analysis and electric catalogue are administered in the portal, and an activity journal tells who did what.                                            |
 | **Secure and dependable**          | Strict isolation between client companies, single sign-on, events that are never lost, centralised logs, tests at every level and a CI pipeline with a quality gate.                                              |
+
+## Live demo
+
+[thesirix.github.io/FleetPilot](https://thesirix.github.io/FleetPilot/) is the real web portal built as a static site: it opens signed in as the platform administrator, and the answers of the GraphQL gateway were recorded from a running platform with the demo dataset (`front/demo/`). Every page can be browsed; changes are refused with a message. It is rebuilt by `.github/workflows/pages.yml` with `npm run generate:demo`.
 
 ## Quick start
 

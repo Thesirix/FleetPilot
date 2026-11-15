@@ -559,6 +559,8 @@
     }
   },
   "errors": {
+    "DEMO_READ_ONLY": "Démo en lecture seule : les modifications sont désactivées.",
+    "DEMO_NOT_RECORDED": "Cette vue n'est pas disponible dans la démo.",
     "VALIDATION_FAILED": "Certains champs sont invalides.",
     "REGISTRATION_ALREADY_USED": "Cette immatriculation existe déjà dans le parc.",
     "VIN_ALREADY_USED": "Ce numéro VIN existe déjà dans le parc.",
